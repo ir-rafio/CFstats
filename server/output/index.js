@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var body_parser_1 = __importDefault(require("body-parser"));
+var cors_1 = __importDefault(require("cors"));
+var dotenv_1 = __importDefault(require("dotenv"));
+var express_1 = __importDefault(require("express"));
+// import * as contestRoutes from './contests/routes';
+// import * as problemRoutes from './problems/routes';
+// import * as userRoutes from './users/routes';
+dotenv_1.default.config();
+var app = (0, express_1.default)();
+var PORT = Number(process.env.PORT) || 4001;
+app.use(body_parser_1.default.json({ limit: '50mb' }));
+app.use(body_parser_1.default.urlencoded({ limit: '50mb', extended: true }));
+app.use((0, cors_1.default)());
+// app.use('/users', userRoutes);
+// app.use('/contests', contestRoutes);
+// app.use('/problems', problemRoutes);
+app.listen(PORT, function () { return console.log("Server is running on port ".concat(PORT)); });
