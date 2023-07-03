@@ -3,9 +3,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 
-// import * as contestRoutes from './contests/routes';
-// import * as problemRoutes from './problems/routes';
-// import * as userRoutes from './users/routes';
+import userRoutes from './user/user.routes';
+// import contestRoutes from './contest/contest.routes';
+// import problemRoutes from './problem/problem.routes';
 
 dotenv.config();
 
@@ -16,8 +16,8 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors());
 
-// app.use('/users', userRoutes);
-// app.use('/contests', contestRoutes);
-// app.use('/problems', problemRoutes);
+app.use('/user', userRoutes);
+// app.use('/contest', contestRoutes);
+// app.use('/problem', problemRoutes);
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
