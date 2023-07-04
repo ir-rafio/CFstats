@@ -220,7 +220,7 @@ const getUserRecords = async (
 
     return {
       solutions,
-      contests,
+      contests: contests,
     };
   } catch (error) {
     console.error('An error occurred:', error);
