@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  handle                  String         @id
+  name                    String
+  country                 String?
+  city                    String?
+  organization            String?
+  rating                  Int
+  maxRating               Int
+  registrationTimeSeconds Int
+  photoLink               String
+  solutions               UserSolution[]
+  contestParticipants     ContestParticipant[]
+}
+
+model UserSolution {
+  id             Int     @id @default(autoincrement())
+  userHandle     String
+  problemKey     String
+  submissionTime Int
+  contestFlag    Boolean
+  problem        Problem @relation(fields: [problemKey], references: [key])
+  user           User    @relation(fields: [userHandle], references: [handle])
+}
+
+model Problem {
+  key       String         @id @default(dbgenerated("CONCAT(contestId, '-', index)"))
+  contestId Int
+  index     String
+  name      String
+  rating    Int
+  tags      String[]
+  users     UserSolution[]
+  contest   Contest        @relation(fields: [contestId], references: [id])
+}
+
+model Contest {
+  id               Int           @id
+  name             String
+  type             String
+  phase            String
+  startTimeSeconds Int?
+  rank             ContestRank[]
+  problems         Problem[]
+  participants     ContestParticipant[]
+}
+
+model ContestRank {
+  id         Int     @id @default(autoincrement())
+  contestId  Int
+  position   Int
+  userHandle String
+  contest    Contest @relation(fields: [contestId], references: [id])
+}
+
+model ContestParticipant {
+  id        Int     @id @default(autoincrement())
+  contestId Int
+  userHandle String
+  user      User    @relation(fields: [userHandle], references: [handle])
+  contest   Contest @relation(fields: [contestId], references: [id])
+}

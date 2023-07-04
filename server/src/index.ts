@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 
 import contestRoutes from './contest/contest.routes';
+import { prisma } from './prisma';
 import problemRoutes from './problem/problem.routes';
 import userRoutes from './user/user.routes';
 
@@ -19,5 +20,10 @@ app.use(cors());
 app.use('/user', userRoutes);
 app.use('/problem', problemRoutes);
 app.use('/contest', contestRoutes);
+
+process.on('SIGINT', async () => {
+  await prisma.$disconnect();
+  process.exit();
+});
 
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

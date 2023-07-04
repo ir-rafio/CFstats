@@ -9,14 +9,15 @@ import {
   CfUser,
 } from './interfaces';
 
-interface UserSolutions {
+export interface UserSolutions {
   [problemKey: string]: {
+    problem: Problem;
     submissionTime: number;
     contestFlag: boolean;
   };
 }
 
-interface UserInfo {
+export interface UserInfo {
   handle: string;
   name: string;
   country?: string;
@@ -28,7 +29,7 @@ interface UserInfo {
   photoLink: string;
 }
 
-class User {
+export class User {
   handle: string;
   name: string;
   country?: string;
@@ -93,7 +94,7 @@ class User {
   }
 }
 
-class Problem {
+export class Problem {
   contestId: number;
   index: string;
   name: string;
@@ -119,12 +120,12 @@ class Problem {
   }
 }
 
-interface ContestRank {
+export interface ContestRank {
   handle: string;
   position: number;
 }
 
-interface Contest {
+export interface Contest {
   id: number;
   name: string;
   type: 'CF' | 'IOI' | 'ICPC';
@@ -155,14 +156,6 @@ const parseName = (
       : '';
 
   return name;
-};
-
-export const getProblemLevel = (index: string): string => {
-  if (index && index[0].match(/[A-Za-z]/)) {
-    return index[0].toUpperCase();
-  } else {
-    return '0';
-  }
 };
 
 const parseProblem = (problem: CfProblem): Problem => {
@@ -215,6 +208,7 @@ const getUserRecords = async (
         const problemKey = `${contestId}-${problem.index}`;
         if (submission.verdict === 'OK') {
           solutions[problemKey] = {
+            problem: parseProblem(problem),
             submissionTime: submission.creationTimeSeconds,
             contestFlag,
           };
