@@ -42,7 +42,6 @@ const ContestTable = () => {
   };
 
   if (loading) return <div>Loading...</div>;
-  console.log(contests.length);
 
   return (
     <>

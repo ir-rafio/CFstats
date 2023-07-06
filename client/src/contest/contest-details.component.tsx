@@ -25,7 +25,6 @@ const ContestComponent = () => {
       try {
         const response = await getContest(id);
         const contest = response.data;
-        console.log(contest);
         setContest(contest);
       } catch (error) {
         console.error('Error fetching contest:', error);

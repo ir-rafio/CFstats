@@ -63,8 +63,6 @@ export const getUpcomingContests = async (
     );
     const contests: Contest[] = response.data;
     const currentTime = new Date();
-    console.log('Unfiltered:');
-    console.log(contests);
 
     if (mode === 'ONGOING') {
       return contests.filter((contest) => contest.phase === 'CODING');
@@ -109,8 +107,6 @@ export const getUpcomingContests = async (
           new Date(contest.startTimeSeconds * 1000) < endOfWeek
       );
 
-      console.log('Filtered:');
-      console.log(filteredContests);
       return filteredContests;
     } else {
       return contests;

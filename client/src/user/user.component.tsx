@@ -119,8 +119,6 @@ const UserComponent = () => {
   };
 
   const renderSolutionsTable = (solutions: UserSolution[]) => {
-    console.log(solutions.length);
-    console.log(solutions);
     return (
       <Box maxH="200px" overflowY="scroll">
         <Table>
