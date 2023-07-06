@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  handle                  String         @id
+  handle                  String                 @id
   name                    String
   country                 String?
   city                    String?
@@ -17,54 +17,77 @@ model User {
   maxRating               Int
   registrationTimeSeconds Int
   photoLink               String
+  contests                ContestParticipation[]
   solutions               UserSolution[]
-  contestParticipants     ContestParticipant[]
-}
-
-model UserSolution {
-  id             Int     @id @default(autoincrement())
-  userHandle     String
-  problemKey     String
-  submissionTime Int
-  contestFlag    Boolean
-  problem        Problem @relation(fields: [problemKey], references: [key])
-  user           User    @relation(fields: [userHandle], references: [handle])
+  updatedAt               DateTime               @updatedAt
 }
 
 model Problem {
-  key       String         @id @default(dbgenerated("CONCAT(contestId, '-', index)"))
-  contestId Int
-  index     String
-  name      String
-  rating    Int
-  tags      String[]
-  users     UserSolution[]
-  contest   Contest        @relation(fields: [contestId], references: [id])
+  contestId  Int
+  index      String
+  name       String
+  difficulty Int
+  tags       String[]
+  contest    Contest  @relation(fields: [contestId], references: [id])
+  updatedAt  DateTime @updatedAt
+
+  @@id([contestId, index])
 }
 
 model Contest {
-  id               Int           @id
+  id               Int                    @id
   name             String
-  type             String
-  phase            String
   startTimeSeconds Int?
+  type             ContestType
+  phase            ContestPhase
+  contests         ContestParticipation[]
   rank             ContestRank[]
   problems         Problem[]
-  participants     ContestParticipant[]
+  updatedAt        DateTime               @updatedAt
 }
 
 model ContestRank {
-  id         Int     @id @default(autoincrement())
+  id         String  @id @default(uuid())
   contestId  Int
   position   Int
   userHandle String
   contest    Contest @relation(fields: [contestId], references: [id])
+
+  @@unique([contestId, userHandle])
 }
 
-model ContestParticipant {
-  id        Int     @id @default(autoincrement())
-  contestId Int
+model UserSolution {
+  id               String  @id @default(uuid())
+  userHandle       String
+  problemContestId Int
+  problemIndex     String
+  submissionTime   Int
+  contestFlag      Boolean
+  user             User    @relation(fields: [userHandle], references: [handle])
+
+  @@index([userHandle, problemContestId, problemIndex])
+}
+
+model ContestParticipation {
+  id         String  @id @default(uuid())
+  contestId  Int
   userHandle String
-  user      User    @relation(fields: [userHandle], references: [handle])
-  contest   Contest @relation(fields: [contestId], references: [id])
+  contest    Contest @relation(fields: [contestId], references: [id])
+  user       User    @relation(fields: [userHandle], references: [handle])
+
+  @@unique([userHandle, contestId])
+}
+
+enum ContestType {
+  CF
+  IOI
+  ICPC
+}
+
+enum ContestPhase {
+  BEFORE
+  CODING
+  PENDING_SYSTEM_TEST
+  SYSTEM_TEST
+  FINISHED
 }

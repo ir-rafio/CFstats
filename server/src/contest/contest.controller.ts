@@ -1,111 +1,68 @@
-import * as CfApi from '../api/codeforces';
-// import { prisma } from '../prisma';
+import {
+  createContest,
+  createContestInfo,
+  getContest as getContestFromDb,
+  getContestMany,
+} from '../prisma';
 
-export const getContest = async (contestId: number): Promise<CfApi.Contest> => {
-  // const existingContest = await prisma.contest.findUnique({
-  //   where: { id: contestId },
-  //   include: { rank: true },
-  // });
+import {
+  getContest as getContestFromApi,
+  getContestList as getContestListFromApi,
+} from '../api/codeforces/middleware';
+import {
+  Contest,
+  ContestDetails,
+} from '../api/codeforces/middleware/interfaces';
 
-  // if (existingContest) return existingContest;
-
+export const getContest = async (id: number): Promise<ContestDetails> => {
   try {
-    const contest = await CfApi.getContest(contestId);
+    const existingContest = await getContestFromDb(id);
+    if (existingContest) return existingContest;
 
-    // const createdContest = await prisma.contest.create({
-    //   data: {
-    //     id: contestId,
-    //     name: contest.name,
-    //     type: contest.type,
-    //     phase: contest.phase,
-    //     startTimeSeconds: contest.startTimeSeconds,
-    //     rank: {
-    //       create: contest.rank.map((rankData: CfApi.ContestRank) => ({
-    //         handle: rankData.handle,
-    //         position: rankData.position,
-    //       })),
-    //     },
-    //   },
-    //   include: { rank: true },
-    // });
+    const contest = await getContestFromApi(id);
+    const createdContest = await createContest(contest);
 
-    // return createdContest;
+    if (!createdContest) {
+      console.error(`Failed to add contest ${contest.info.id} to the database`);
+      return contest;
+    }
 
-    return contest;
+    return createdContest;
   } catch (error) {
+    console.error(error);
     throw new Error('Failed to fetch the contest from the API.');
   }
 };
 
-export const getContestList = async (): Promise<CfApi.Contest[]> => {
-  // const existingContestList = await prisma.contest.findMany({
-  //   include: { rank: true },
-  // });
-
-  // if (existingContestList.length > 0) {
-  //   return existingContestList;
-  // }
-
+export const getContestList = async (): Promise<Contest[]> => {
   try {
-    const contestList = await CfApi.getContestList();
+    const existingContestList = await getContestMany({});
+    if (existingContestList) return existingContestList;
 
-    // const upsertContestList = contestList.map((contest) => ({
-    //   where: { id: contest.id },
-    //   create: {
-    //     id: contest.id,
-    //     name: contest.name,
-    //     type: contest.type,
-    //     phase: contest.phase,
-    //     startTimeSeconds: contest.startTimeSeconds,
-    //     rank: {
-    //       create: contest.rank.map((rankData: CfApi.ContestRank) => ({
-    //         handle: rankData.handle,
-    //         position: rankData.position,
-    //       })),
-    //     },
-    //   },
-    //   update: {
-    //     name: contest.name,
-    //     type: contest.type,
-    //     phase: contest.phase,
-    //     startTimeSeconds: contest.startTimeSeconds,
-    //     rank: {
-    //       create: contest.rank.map((rankData: CfApi.ContestRank) => ({
-    //         handle: rankData.handle,
-    //         position: rankData.position,
-    //       })),
-    //     },
-    //   },
-    //   include: { rank: true },
-    // }));
+    const contestList = await getContestListFromApi();
+    let flag: boolean = true;
 
-    // const createdContestList = await prisma.contest.upsertMany({
-    //   where: { id: { in: contestList.map((contest) => contest.id) } },
-    //   create: upsertContestList.map((contest) => contest.create),
-    //   update: upsertContestList.map((contest) => contest.update),
-    //   include: { rank: true },
-    // });
+    const createdContestList: Contest[] = [];
+    for (const contest of contestList) {
+      const createdContest = await createContestInfo(contest);
+      if (createdContest) createdContestList.push(createdContest);
+      else {
+        console.error(`Failed to add contest ${contest.id} to Database`);
+        flag = false;
+      }
+    }
 
-    // return createdContestList;
+    return flag ? createdContestList : contestList;
     return contestList;
   } catch (error) {
-    throw new Error('Failed to fetch the contests from the API.');
+    console.error(error);
+    throw new Error('Failed to fetch contests from the API/Database.');
   }
 };
 
-export const getUpcomingContests = async (): Promise<CfApi.Contest[]> => {
-  // const upcomingContests = await prisma.contest.findMany({
-  //   where: {
-  //     phase: 'BEFORE',
-  //   },
-  //   include: { rank: true },
-  // });
+export const getUpcomingContests = async (): Promise<Contest[]> => {
+  const upcomingContests = await getContestMany({ phase: 'BEFORE' });
+  return upcomingContests ?? [];
 
-  const contestList = await getContestList();
-
-  const upcomingContests = contestList.filter(
-    (contest) => contest.phase === 'BEFORE'
-  );
-
-  return upcomingContests;
+  return getContestList();
 };

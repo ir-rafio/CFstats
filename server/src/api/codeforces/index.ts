@@ -1,375 +1,115 @@
-import * as dataFetcher from './data-fetcher';
+import axios from 'axios';
 import {
   CfContest,
   CfContestStandings,
-  CfProblem,
   CfProblemSet,
-  CfRankListRow,
+  CfResponse,
   CfSubmission,
   CfUser,
 } from './interfaces';
 
-export interface UserSolutions {
-  [problemKey: string]: {
-    problem: Problem;
-    submissionTime: number;
-    contestFlag: boolean;
-  };
-}
-
-export interface UserInfo {
-  handle: string;
-  name: string;
-  country?: string;
-  city?: string;
-  organization?: string;
-  rating: number;
-  maxRating: number;
-  registrationTimeSeconds: number;
-  photoLink: string;
-}
-
-export class User {
-  handle: string;
-  name: string;
-  country?: string;
-  city?: string;
-  organization?: string;
-  rating: number;
-  maxRating: number;
-  registrationTimeSeconds: number;
-  photoLink: string;
-  solutions: UserSolutions;
-  contests: Set<number>;
-
-  constructor(
-    handle: string,
-    name: string,
-    rating: number,
-    maxRating: number,
-    registrationTimeSeconds: number,
-    photoLink: string,
-    solutions: UserSolutions,
-    contests: Set<number>,
-    country?: string,
-    city?: string,
-    organization?: string
-  ) {
-    this.handle = handle;
-    this.name = name;
-    this.country = country;
-    this.city = city;
-    this.organization = organization;
-    this.rating = rating;
-    this.maxRating = maxRating;
-    this.registrationTimeSeconds = registrationTimeSeconds;
-    this.photoLink = photoLink;
-    this.solutions = solutions;
-    this.contests = contests;
-  }
-
-  getInfo(): UserInfo {
-    const {
-      handle,
-      name,
-      country,
-      city,
-      organization,
-      rating,
-      maxRating,
-      registrationTimeSeconds,
-      photoLink,
-    } = this;
-    return {
-      handle,
-      name,
-      country,
-      city,
-      organization,
-      rating,
-      maxRating,
-      registrationTimeSeconds,
-      photoLink,
-    };
-  }
-}
-
-export class Problem {
-  contestId: number;
-  index: string;
-  name: string;
-  rating: number;
-  tags: string[];
-
-  constructor(
-    contestId: number,
-    index: string,
-    name: string,
-    rating: number,
-    tags: string[]
-  ) {
-    this.contestId = contestId;
-    this.index = index;
-    this.name = name;
-    this.rating = rating;
-    this.tags = tags;
-  }
-
-  getKey(): string {
-    return `${this.contestId}-${this.index}`;
-  }
-}
-
-export interface ContestRank {
-  handle: string;
-  position: number;
-}
-
-export interface Contest {
-  id: number;
-  name: string;
-  type: 'CF' | 'IOI' | 'ICPC';
-  phase:
-    | 'BEFORE'
-    | 'CODING'
-    | 'PENDING_SYSTEM_TEST'
-    | 'SYSTEM_TEST'
-    | 'FINISHED';
-  startTimeSeconds?: number;
-  rank: ContestRank[];
-}
-
-const parseName = (
-  firstName: string | undefined,
-  lastName: string | undefined
-): string => {
-  const normalizedFirstName = firstName || '';
-  const normalizedLastName = lastName || '';
-
-  const name =
-    normalizedFirstName && normalizedLastName
-      ? normalizedFirstName + ' ' + normalizedLastName
-      : normalizedFirstName
-      ? normalizedFirstName
-      : normalizedLastName
-      ? normalizedLastName
-      : '';
-
-  return name;
-};
-
-const parseProblem = (problem: CfProblem): Problem => {
-  if (!problem.contestId)
-    throw new Error('Invalid problem: contest id is missing!');
-
-  const { contestId, index, name, tags } = problem;
-  const rating = problem.rating || 0;
-  return new Problem(contestId, index, name, rating, tags);
-};
-
-const parseContest = (
-  contest: CfContest,
-  rankingRows: CfRankListRow[]
-): Contest => {
-  let rank: ContestRank[] = [];
-
-  for (const row of rankingRows) {
-    const { party } = row;
-    const { members } = row.party;
-    const position = row.rank;
-
-    for (const member of members) {
-      const { handle } = member;
-      rank.push({ handle, position });
+function parseCfResponse<T>(cfResponse: CfResponse<T>): T {
+  if (cfResponse.status === 'OK') {
+    if (cfResponse.result) {
+      return cfResponse.result;
+    } else {
+      throw new Error('Invalid response: result is missing!');
     }
+  } else if (cfResponse.comment) {
+    throw new Error(`Invalid response: ${cfResponse.comment}!`);
+  } else {
+    throw new Error('Invalid response!');
   }
+}
 
-  const { id, name, type, phase, startTimeSeconds } = contest;
-  return { id, name, type, phase, startTimeSeconds, rank };
+export const getCfUser = async (handle: string): Promise<CfUser> => {
+  try {
+    const response = await axios.get<CfResponse<CfUser[]>>(
+      `https://codeforces.com/api/user.info?handles=${handle}`
+    );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    return parseCfResponse(response.data)[0];
+  } catch (error) {
+    console.error('An error occurred:', error);
+    throw new Error('Failed to fetch user information');
+  }
 };
 
-const getUserRecords = async (
+export const getCfUserSubmissions = async (
   handle: string
-): Promise<{ solutions: UserSolutions; contests: Set<number> }> => {
+): Promise<CfSubmission[]> => {
   try {
-    const submissions: CfSubmission[] = await dataFetcher.getCfUserSubmissions(
-      handle
+    const response = await axios.get<CfResponse<CfSubmission[]>>(
+      `https://codeforces.com/api/user.status?handle=${handle}`
     );
-    const solutions: UserSolutions = {};
-    const contests: Set<number> = new Set();
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    for (const submission of submissions) {
-      const problem: CfProblem = submission.problem;
-      const contestFlag: boolean =
-        submission.author.participantType === 'CONTESTANT';
-
-      if ('contestId' in problem) {
-        const contestId = problem.contestId;
-        const problemKey = `${contestId}-${problem.index}`;
-        if (submission.verdict === 'OK') {
-          solutions[problemKey] = {
-            problem: parseProblem(problem),
-            submissionTime: submission.creationTimeSeconds,
-            contestFlag,
-          };
-        }
-      }
-
-      if (contestFlag && problem.contestId) contests.add(problem.contestId);
-    }
-
-    return {
-      solutions,
-      contests: contests,
-    };
+    return parseCfResponse(response.data);
   } catch (error) {
     console.error('An error occurred:', error);
-    throw new Error('Failed to get user records');
+    throw new Error('Failed to fetch user submissions');
   }
 };
 
-export const getUser = async (handle: string): Promise<User> => {
-  try {
-    const cfUser: CfUser = await dataFetcher.getCfUser(handle);
-    const {
-      firstName,
-      lastName,
-      country,
-      city,
-      organization,
-      rating,
-      maxRating,
-      registrationTimeSeconds,
-    } = cfUser;
-    const name = parseName(firstName, lastName);
-    const photoLink = cfUser.titlePhoto;
-    const { solutions, contests } = await getUserRecords(handle);
-
-    return new User(
-      handle,
-      name,
-      rating,
-      maxRating,
-      registrationTimeSeconds,
-      photoLink,
-      solutions,
-      contests,
-      country,
-      city,
-      organization
-    );
-  } catch (error) {
-    console.error('An error occurred:', error);
-    throw new Error('Failed to get user data');
-  }
-};
-
-export const getUserList = async (
+export const getCfUserList = async (
   isActiveOnly: boolean,
   shouldIncludeRetired: boolean
-): Promise<User[]> => {
+): Promise<CfUser[]> => {
   try {
-    const cfUsers: CfUser[] = await dataFetcher.getCfUserList(
-      isActiveOnly,
-      shouldIncludeRetired
+    const response = await axios.get<CfResponse<CfUser[]>>(
+      `https://codeforces.com/api/user.ratedList?activeOnly=${isActiveOnly}&includeRetired=${shouldIncludeRetired}`
     );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    let users: User[] = [];
-    for (const cfUser of cfUsers) {
-      const {
-        handle,
-        firstName,
-        lastName,
-        country,
-        city,
-        organization,
-        rating,
-        maxRating,
-        registrationTimeSeconds,
-      } = cfUser;
-      const name = parseName(firstName, lastName);
-      const photoLink = cfUser.titlePhoto;
-      const { solutions, contests } = await getUserRecords(handle);
-
-      users.push(
-        new User(
-          handle,
-          name,
-          rating,
-          maxRating,
-          registrationTimeSeconds,
-          photoLink,
-          solutions,
-          contests,
-          country,
-          city,
-          organization
-        )
-      );
-    }
-
-    return users;
+    return parseCfResponse(response.data);
   } catch (error) {
     console.error('An error occurred:', error);
-    throw new Error('Failed to get user data');
+    throw new Error('Failed to fetch user list');
   }
 };
 
-export const getProblem = async (
+export const getCfProblemSet = async (): Promise<CfProblemSet> => {
+  try {
+    const response = await axios.get<CfResponse<CfProblemSet>>(
+      'https://codeforces.com/api/problemset.problems'
+    );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    return parseCfResponse(response.data);
+  } catch (error) {
+    console.error('An error occurred:', error);
+    throw new Error('Failed to fetch problem list');
+  }
+};
+
+export const getCfContestList = async (): Promise<CfContest[]> => {
+  try {
+    const response = await axios.get<CfResponse<CfContest[]>>(
+      'https://codeforces.com/api/contest.list?gym=false'
+    );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    return parseCfResponse(response.data);
+  } catch (error) {
+    console.error('An error occurred:', error);
+    throw new Error('Failed to fetch the contest list');
+  }
+};
+
+export const getContestStandings = async (
   contestId: number,
-  index: string
-): Promise<Problem> => {
+  count: number
+): Promise<CfContestStandings> => {
   try {
-    const cfContestStandings: CfContestStandings =
-      await dataFetcher.getContestStandings(contestId, 1);
-    const cfContestProblems: CfProblem[] = cfContestStandings['problems'];
+    const response = await axios.get<CfResponse<CfContestStandings>>(
+      `https://codeforces.com/api/contest.standings?contestId=${contestId}&from=1&count=${count}&showUnofficial=false`
+    );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    for (const problem of cfContestProblems)
-      if (problem.index === index) return parseProblem(problem);
-    throw new Error('Problem not found!');
+    return parseCfResponse(response.data);
   } catch (error) {
     console.error('An error occurred:', error);
-    throw new Error('Failed to get problem data');
-  }
-};
-
-export const getProblemList = async (): Promise<Problem[]> => {
-  try {
-    const cfProblemSet: CfProblemSet = await dataFetcher.getCfProblemSet();
-    const cfProblems: CfProblem[] = cfProblemSet['problems'];
-
-    let problems: Problem[] = [];
-    for (const problem of cfProblems) problems.push(parseProblem(problem));
-
-    return problems;
-  } catch (error) {
-    console.error('An error occurred:', error);
-    throw new Error('Failed to get problem data');
-  }
-};
-
-export const getContest = async (contestId: number): Promise<Contest> => {
-  try {
-    const cfContestStandings: CfContestStandings =
-      await dataFetcher.getContestStandings(contestId, 5);
-    const cfContest: CfContest = cfContestStandings['contest'];
-    const rankingRows: CfRankListRow[] = cfContestStandings['rows'];
-    return parseContest(cfContest, rankingRows);
-  } catch (error) {
-    console.error('An error occurred:', error);
-    throw new Error('Failed to get contest data');
-  }
-};
-
-export const getContestList = async (): Promise<Contest[]> => {
-  try {
-    const cfContests: CfContest[] = await dataFetcher.getCfContestList();
-    let contests: Contest[] = [];
-    for (const cfContest of cfContests)
-      contests.push(await getContest(cfContest.id));
-    return contests;
-  } catch (error) {
-    console.error('An error occurred:', error);
-    throw new Error('Failed to get contest data');
+    throw new Error('Failed to fetch the contest standings');
   }
 };

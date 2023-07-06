@@ -1,67 +1,56 @@
-import * as CfApi from '../api/codeforces';
-// import { prisma } from '../prisma';
+import {
+  getProblem as getProblemFromApi,
+  getProblemList as getProblemListFromApi,
+} from '../api/codeforces/middleware';
+import { Problem } from '../api/codeforces/middleware/interfaces';
+import {
+  createProblem,
+  getProblem as getProblemFromDb,
+  getProblemMany,
+} from '../prisma';
 
-const parseKey = (key: string): { contestId: number; index: string } => {
-  const [contestStr, index] = key.split('-');
-  const contestId = parseInt(contestStr, 10);
-
-  return { contestId, index };
-};
-
-export const getProblem = async (key: string): Promise<CfApi.Problem> => {
-  const { contestId, index } = parseKey(key);
-
-  // const existingProblem = await prisma.problem.findUnique({
-  //   where: { key },
-  // });
-
-  // if (existingProblem) {
-  //   return existingProblem;
-  // }
-
+export const getProblem = async (key: string): Promise<Problem> => {
   try {
-    const problem = await CfApi.getProblem(contestId, index);
+    const { contestId, index } = Problem.parseKey(key);
 
-    // const createdProblem = await prisma.problem.create({
-    //   data: {
-    //     contestId: problem.contestId,
-    //     index: problem.index,
-    //     name: problem.name,
-    //     rating: problem.rating,
-    //     tags: problem.tags,
-    //   },
-    // });
+    const existingProblem = await getProblemFromDb(contestId, index);
+    if (existingProblem) return existingProblem;
 
-    // return createdProblem;
-    return problem;
+    const problem = await getProblemFromApi(contestId, index);
+    const createdProblem = await createProblem(problem);
+    if (!createdProblem) {
+      console.error(`Failed to add problem ${problem.getKey()} to Database`);
+      return problem;
+    }
+
+    return createdProblem;
   } catch (error) {
-    throw new Error('Failed to fetch the problem from the API.');
+    console.error(error);
+    throw new Error('Failed to fetch problem from the API/Database.');
   }
 };
 
-export const getProblemList = async (): Promise<CfApi.Problem[]> => {
-  // const existingProblemList = await prisma.problem.findMany();
-
-  // if (existingProblemList.length > 0) {
-  //   return existingProblemList;
-  // }
-
+export const getProblemList = async (): Promise<Problem[]> => {
   try {
-    const problemList = await CfApi.getProblemList();
+    const existingProblemList = await getProblemMany({});
+    if (existingProblemList) return existingProblemList;
 
-    // const createdProblemList = await prisma.problem.createMany({
-    //   data: problemList.map((problem) => ({
-    //     contestId: problem.contestId,
-    //     index: problem.index,
-    //     name: problem.name,
-    //     rating: problem.rating,
-    //     tags: problem.tags,
-    //   })),
-    // });
+    const problemList = await getProblemListFromApi();
+    let flag: boolean = true;
 
-    // return createdProblemList;
-    return problemList;
+    const createdProblemList: Problem[] = [];
+    for (const problem of problemList) {
+      const createdProblem = await createProblem(problem);
+      if (createdProblem) createdProblemList.push(createdProblem);
+      else {
+        console.error(`Failed to add Problem ${problem.getKey()} to Database`);
+        flag = false;
+      }
+    }
+
+    return flag ? createdProblemList : problemList;
   } catch (error) {
-    throw new Error('Failed to fetch the problems from the API.');
+    console.error(error);
+    throw new Error('Failed to fetch problems from the API/Database.');
   }
 };

@@ -1,16 +1,40 @@
 import express, { Request, Response } from 'express';
-import { getContest } from './contest.controller';
+import {
+  getContest,
+  getContestList,
+  getUpcomingContests,
+} from './contest.controller';
 
 const router = express.Router();
+
+router.get('/many', async (req: Request, res: Response) => {
+  try {
+    const contestList = await getContestList();
+    res.status(200).json(contestList);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+    console.error(error);
+  }
+});
+
+router.get('/upcoming', async (req: Request, res: Response) => {
+  try {
+    const contestList = await getUpcomingContests();
+    res.status(200).json(contestList);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+    console.error(error);
+  }
+});
 
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id: number = Number(req.params.id);
-    const contestList = await getContest(id);
-    res.status(200).json(contestList);
+    const contest = await getContest(id);
+    res.status(200).json(contest);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
-    console.log(error);
+    console.error(error);
   }
 });
 

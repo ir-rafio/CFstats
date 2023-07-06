@@ -3,13 +3,13 @@ import { getProblem, getProblemList } from './problem.controller';
 
 const router = express.Router();
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/many', async (req: Request, res: Response) => {
   try {
     const problemList = await getProblemList();
     res.status(200).json(problemList);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
-    console.log(error);
+    console.error(error);
   }
 });
 
@@ -20,7 +20,7 @@ router.get('/:key', async (req: Request, res: Response) => {
     res.status(200).json(problemList);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
-    console.log(error);
+    console.error(error);
   }
 });
 

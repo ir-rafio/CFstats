@@ -1,0 +1,10 @@
+version: '3.9'
+services:
+  cf-stat-db:
+    image: postgres:latest
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: IAmHere
+      POSTGRES_DB: cf-stat-db
