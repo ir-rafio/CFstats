@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import ContestComponent from './contest/contest.component';
+import ContestComponent from './contest/contest-details.component';
+import ContestTable from './contest/contest-table.component';
 import ProblemComponent from './problem/problem.component';
 import UserComponent from './user/user.component';
 
@@ -9,6 +10,7 @@ const App = () => {
       <Routes>
         <Route path="/user/:handle" element={<UserComponent />} />
         <Route path="/problem/:key" element={<ProblemComponent />} />
+        <Route path="/contest/" element={<ContestTable />} />
         <Route path="/contest/:id" element={<ContestComponent />} />
         <Route
           path="/"

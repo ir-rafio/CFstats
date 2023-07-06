@@ -3,6 +3,7 @@ import {
   Divider,
   HStack,
   Heading,
+  Link,
   Table,
   Tbody,
   Td,
@@ -15,7 +16,8 @@ import {
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ParsedUser, UserSolutions, getUser } from '../api';
+import { getUser } from '../api';
+import { ParsedUser, Problem, UserSolution } from '../api/interfaces';
 
 const UserComponent = () => {
   const { handle } = useParams();
@@ -26,7 +28,6 @@ const UserComponent = () => {
       try {
         const response = await getUser(handle || ' ');
         const user = response.data;
-        console.log(user);
         setUserData(user);
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -76,9 +77,6 @@ const UserComponent = () => {
   };
 
   const renderContestTable = (contests: number[]) => {
-    console.log('Contests:', contests);
-    console.log(contests.length);
-
     return (
       <Box maxH="200px" overflowY="scroll">
         <Table>
@@ -90,7 +88,9 @@ const UserComponent = () => {
           <Tbody>
             {Array.from(contests).map((id) => (
               <Tr key={id}>
-                <Td>{id}</Td>
+                <Link href={`../contest/${id}`} isExternal color="blue.500">
+                  {id}
+                </Link>
               </Tr>
             ))}
           </Tbody>
@@ -99,7 +99,9 @@ const UserComponent = () => {
     );
   };
 
-  const renderSolutionsTable = (solutions: UserSolutions) => {
+  const renderSolutionsTable = (solutions: UserSolution[]) => {
+    console.log(solutions.length);
+    console.log(solutions);
     return (
       <Box maxH="200px" overflowY="scroll">
         <Table>
@@ -111,19 +113,27 @@ const UserComponent = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {Object.entries(solutions).map(([problemKey, solution]) => (
-              <Tr key={problemKey}>
-                <Td>
-                  <a href={`../problem/${problemKey}`}>{problemKey}</a>
-                </Td>
-                <Td>
-                  {moment(solution.submissionTime * 1000).format(
-                    'YYYY-MM-DD HH:mm:ss'
-                  )}
-                </Td>
-                <Td>{solution.contestFlag ? 'Yes' : 'No'}</Td>
-              </Tr>
-            ))}
+            {solutions.map((solution) => {
+              const problem = solution.problem;
+              const problemKey = Problem.generateKey(
+                problem.contestId,
+                problem.index
+              );
+
+              return (
+                <Tr key={problemKey}>
+                  <Td>
+                    <Link href={`../problem/${problemKey}`}>{problemKey}</Link>
+                  </Td>
+                  <Td>
+                    {moment(solution.submissionTime * 1000).format(
+                      'YYYY-MM-DD HH:mm:ss'
+                    )}
+                  </Td>
+                  <Td>{solution.contestFlag ? 'Yes' : 'No'}</Td>
+                </Tr>
+              );
+            })}
           </Tbody>
         </Table>
       </Box>

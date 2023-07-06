@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  handle                  String                 @id
+  handle                  String          @id
   name                    String
   country                 String?
   city                    String?
@@ -17,9 +17,9 @@ model User {
   maxRating               Int
   registrationTimeSeconds Int
   photoLink               String
-  contests                ContestParticipation[]
-  solutions               UserSolution[]
-  updatedAt               DateTime               @updatedAt
+  updatedAt               DateTime        @updatedAt
+  contests                Participation[]
+  solutions               Solution[]
 }
 
 model Problem {
@@ -28,22 +28,22 @@ model Problem {
   name       String
   difficulty Int
   tags       String[]
-  contest    Contest  @relation(fields: [contestId], references: [id])
   updatedAt  DateTime @updatedAt
+  contest    Contest  @relation(fields: [contestId], references: [id])
 
   @@id([contestId, index])
 }
 
 model Contest {
-  id               Int                    @id
+  id               Int             @id
   name             String
   startTimeSeconds Int?
   type             ContestType
   phase            ContestPhase
-  contests         ContestParticipation[]
-  rank             ContestRank[]
+  updatedAt        DateTime        @updatedAt
+  ranks            ContestRank[]
+  users            Participation[]
   problems         Problem[]
-  updatedAt        DateTime               @updatedAt
 }
 
 model ContestRank {
@@ -56,8 +56,7 @@ model ContestRank {
   @@unique([contestId, userHandle])
 }
 
-model UserSolution {
-  id               String  @id @default(uuid())
+model Solution {
   userHandle       String
   problemContestId Int
   problemIndex     String
@@ -65,17 +64,16 @@ model UserSolution {
   contestFlag      Boolean
   user             User    @relation(fields: [userHandle], references: [handle])
 
-  @@index([userHandle, problemContestId, problemIndex])
+  @@id([userHandle, problemContestId, problemIndex])
 }
 
-model ContestParticipation {
-  id         String  @id @default(uuid())
+model Participation {
   contestId  Int
   userHandle String
   contest    Contest @relation(fields: [contestId], references: [id])
   user       User    @relation(fields: [userHandle], references: [handle])
 
-  @@unique([userHandle, contestId])
+  @@id([userHandle, contestId])
 }
 
 enum ContestType {

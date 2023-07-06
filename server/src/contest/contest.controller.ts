@@ -53,7 +53,6 @@ export const getContestList = async (): Promise<Contest[]> => {
     }
 
     return flag ? createdContestList : contestList;
-    return contestList;
   } catch (error) {
     console.error(error);
     throw new Error('Failed to fetch contests from the API/Database.');
@@ -62,7 +61,6 @@ export const getContestList = async (): Promise<Contest[]> => {
 
 export const getUpcomingContests = async (): Promise<Contest[]> => {
   const upcomingContests = await getContestMany({ phase: 'BEFORE' });
-  return upcomingContests ?? [];
 
-  return getContestList();
+  return upcomingContests ?? [];
 };

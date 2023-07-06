@@ -33,15 +33,18 @@ export const createUser = async (user: User): Promise<User | null> => {
         registrationTimeSeconds: user.registrationTimeSeconds,
         photoLink: user.photoLink,
       },
-      update: {},
+      update: { updatedAt: new Date() },
     });
-    await prisma.userSolution.deleteMany({
+
+    await prisma.solution.deleteMany({
       where: { userHandle: user.handle },
     });
-    await prisma.contestParticipation.deleteMany({
+
+    await prisma.participation.deleteMany({
       where: { userHandle: user.handle },
     });
-    await prisma.userSolution.createMany({
+
+    await prisma.solution.createMany({
       data: Object.entries(user.solutions).map(([problemKey, solution]) => ({
         problemContestId: solution.problem.contestId,
         problemIndex: solution.problem.index,
@@ -50,7 +53,8 @@ export const createUser = async (user: User): Promise<User | null> => {
         userHandle: user.handle,
       })),
     });
-    await prisma.contestParticipation.createMany({
+
+    await prisma.participation.createMany({
       data: Array.from(user.contests).map((contestId) => ({
         userHandle: user.handle,
         contestId,
@@ -72,19 +76,21 @@ export const getUser = async (handle: string): Promise<User | null> => {
       contests: true,
     },
   });
+
   if (!dbUser) return null;
-  if (!checkRecent(dbUser.updatedAt, 7200)) return null;
+  if (!checkRecent(dbUser.updatedAt, 7200)) null;
 
   const mappedContests: number[] = dbUser.contests.map(
     (contest) => contest.contestId
   );
   const mappedSolutions: UserSolution[] = [];
+
   for (const solution of dbUser.solutions) {
     const { submissionTime, contestFlag } = solution;
     const contestId = solution.problemContestId;
     const index = solution.problemIndex;
 
-    const problem = await getProblem(contestId, index);
+    const problem = await fetchProblem(contestId, index);
     if (!problem) continue;
 
     mappedSolutions.push({ problem, submissionTime, contestFlag });
@@ -143,10 +149,29 @@ export const createProblem = async (
         set: tags,
       },
     },
-    update: {},
+    update: { updatedAt: new Date() },
   });
 
   return dbProblem ? problem : null;
+};
+
+const fetchProblem = async (
+  contestId: number,
+  index: string
+): Promise<Problem | null> => {
+  const dbProblem = await prisma.problem.findUnique({
+    where: {
+      contestId_index: {
+        contestId,
+        index,
+      },
+    },
+  });
+
+  if (!dbProblem) return null;
+
+  const { name, difficulty, tags } = dbProblem;
+  return new Problem(contestId, index, name, difficulty, tags);
 };
 
 export const getProblem = async (
@@ -166,7 +191,10 @@ export const getProblem = async (
   if (!checkRecent(dbProblem.updatedAt, 7200)) return null;
 
   const { name, difficulty, tags } = dbProblem;
-  return new Problem(contestId, index, name, difficulty, tags);
+  const problem = new Problem(contestId, index, name, difficulty, tags);
+
+  if (!checkRecent(dbProblem.updatedAt, 7200)) return createProblem(problem);
+  return problem;
 };
 
 export const getProblemMany = async (
@@ -197,7 +225,7 @@ export const createContest = async (
       phase: info.phase,
       startTimeSeconds: info.startTimeSeconds,
     },
-    update: {},
+    update: { updatedAt: new Date() },
   });
 
   await prisma.contestRank.deleteMany({ where: { contestId: info.id } });
@@ -225,7 +253,7 @@ export const createContestInfo = async (
       phase: contest.phase,
       startTimeSeconds: contest.startTimeSeconds,
     },
-    update: {},
+    update: { updatedAt: new Date() },
   });
 
   return dbContest ? contest : null;
@@ -236,12 +264,13 @@ export const getContest = async (
 ): Promise<ContestDetails | null> => {
   const dbContest = await prisma.contest.findUnique({
     where: { id },
-    include: { rank: true },
+    include: { ranks: true },
   });
+
   if (!dbContest) return null;
   if (!checkRecent(dbContest.updatedAt, 7200)) return null;
 
-  const { name, type, phase, startTimeSeconds, rank } = dbContest;
+  const { name, type, phase, startTimeSeconds, ranks } = dbContest;
   const contest: Contest = {
     id,
     name,
@@ -250,9 +279,9 @@ export const getContest = async (
     startTimeSeconds: startTimeSeconds ?? undefined,
   };
 
-  const contestRank: ContestRank[] = rank.map((contestRank) => ({
-    handle: contestRank.userHandle,
-    position: contestRank.position,
+  const contestRank: ContestRank[] = ranks.map((rank) => ({
+    handle: rank.userHandle,
+    position: rank.position,
   }));
 
   return {

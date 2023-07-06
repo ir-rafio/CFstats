@@ -1,7 +1,8 @@
-import { Box, Heading, Text, VStack } from '@chakra-ui/react';
+import { Box, Heading, Link, Text, VStack } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Problem, getProblem } from '../api';
+import { getProblem } from '../api';
+import { Problem } from '../api/interfaces';
 
 const ProblemComponent = () => {
   const { key } = useParams();
@@ -12,7 +13,6 @@ const ProblemComponent = () => {
       try {
         const response = await getProblem(key || ' ');
         const problem = response.data;
-        console.log(problem);
         setProblemData(problem);
       } catch (error) {
         console.error('Error fetching problem:', error);
@@ -24,20 +24,22 @@ const ProblemComponent = () => {
 
   if (!problemData) return <div>Loading...</div>;
 
-  const { contestId, index, name, rating, tags } = problemData;
+  const { contestId, index, name, difficulty, tags } = problemData;
 
   return (
     <VStack spacing={8} align="start">
       <Box>
         <Heading size="lg">Problem: {key}</Heading>
         <Text fontWeight="bold">Contest ID:</Text>
-        <Text>{contestId}</Text>
+        <Link href={`../contest/${contestId}`} isExternal color="blue.500">
+          {contestId}
+        </Link>
         <Text fontWeight="bold">Index:</Text>
         <Text>{index}</Text>
         <Text fontWeight="bold">Name:</Text>
         <Text>{name}</Text>
-        <Text fontWeight="bold">Rating:</Text>
-        <Text>{rating}</Text>
+        <Text fontWeight="bold">Difficulty:</Text>
+        <Text>{difficulty}</Text>
         <Text fontWeight="bold">Tags:</Text>
         <Text>{tags.join(', ')}</Text>
       </Box>

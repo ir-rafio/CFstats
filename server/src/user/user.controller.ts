@@ -1,6 +1,6 @@
 import { getUser as getUserFromApi } from '../api/codeforces/middleware';
 import { User } from '../api/codeforces/middleware/interfaces';
-import { createUser } from '../prisma';
+import { createUser, getUser as getUserFromDb } from '../prisma';
 
 enum CodeforcesRank {
   Newbie = 'Newbie',
@@ -85,11 +85,10 @@ const parseUser = async (user: User): Promise<ParsedUser> => {
 
 const getUser = async (handle: string): Promise<User> => {
   try {
-    // const existingUser = await getUserFromDb(handle);
-    // if (existingUser) return existingUser;
+    const existingUser = await getUserFromDb(handle);
+    if (existingUser) return existingUser;
 
     const user = await getUserFromApi(handle);
-    console.log(user.solutions.length);
     const createdUser = await createUser(user);
     if (!createdUser) {
       console.error(`Failed to add user ${user.handle} to Database`);

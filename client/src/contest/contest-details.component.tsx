@@ -13,11 +13,12 @@ import {
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Contest, getContest } from '../api';
+import { getContest } from '../api';
+import { ContestDetails } from '../api/interfaces';
 
 const ContestComponent = () => {
   const id = Number(useParams().id);
-  const [contestData, setContestData] = useState<Contest | null>(null);
+  const [contest, setContest] = useState<ContestDetails | null>(null);
 
   useEffect(() => {
     const fetchContest = async () => {
@@ -25,7 +26,7 @@ const ContestComponent = () => {
         const response = await getContest(id);
         const contest = response.data;
         console.log(contest);
-        setContestData(contest);
+        setContest(contest);
       } catch (error) {
         console.error('Error fetching contest:', error);
       }
@@ -34,9 +35,10 @@ const ContestComponent = () => {
     fetchContest();
   }, [id]);
 
-  if (!contestData) return <div>Loading...</div>;
+  if (!contest) return <div>Loading...</div>;
 
-  const { name, type, phase, startTimeSeconds, rank } = contestData;
+  const { name, type, phase, startTimeSeconds } = contest.info;
+  const { rank } = contest;
 
   return (
     <VStack spacing={8} align="start">
