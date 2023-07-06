@@ -107,7 +107,7 @@ export const getUser = async (handle: string): Promise<User | null> => {
 };
 
 export const getUserMany = async (
-  prismaFilter: any
+  prismaFilter: object
 ): Promise<User[] | null> => {
   const dbUsers = await prisma.user.findMany({ where: prismaFilter });
   if (!dbUsers) return null;
@@ -198,7 +198,7 @@ export const getProblem = async (
 };
 
 export const getProblemMany = async (
-  prismaFilter: any
+  prismaFilter: object
 ): Promise<Problem[] | null> => {
   const dbProblems = await prisma.problem.findMany({ where: prismaFilter });
   if (!dbProblems) return null;
@@ -291,7 +291,7 @@ export const getContest = async (
 };
 
 export const getContestMany = async (
-  prismaFilter: any
+  prismaFilter: object
 ): Promise<Contest[] | null> => {
   const dbContests = await prisma.contest.findMany({ where: prismaFilter });
   if (!dbContests) return null;
