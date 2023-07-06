@@ -59,8 +59,20 @@ export const getContestList = async (): Promise<Contest[]> => {
   }
 };
 
-export const getUpcomingContests = async (): Promise<Contest[]> => {
-  const upcomingContests = await getContestMany({ phase: 'BEFORE' });
+export const getFilteredContests = async (
+  prismaFilter: object
+): Promise<Contest[]> => {
+  const existingContests = await getContestMany(prismaFilter);
+  if (existingContests) return existingContests;
 
-  return upcomingContests ?? [];
+  const contestList = await getContestListFromApi();
+  const createdContestList: Contest[] = [];
+  for (const contest of contestList) {
+    const createdContest = await createContestInfo(contest);
+    if (createdContest) createdContestList.push(createdContest);
+    else console.error(`Failed to add contest ${contest.id} to Database`);
+  }
+
+  const filteredContests = await getContestMany(prismaFilter);
+  return filteredContests ?? [];
 };
