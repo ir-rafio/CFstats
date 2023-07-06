@@ -41,22 +41,6 @@ const ContestTable = () => {
     setMode(selectedMode);
   };
 
-  const getContestStatus = (startTimeSeconds?: number, phase?: string) => {
-    if (!startTimeSeconds || !phase) {
-      return 'Unknown';
-    }
-
-    const startTime = new Date(startTimeSeconds * 1000);
-
-    if (phase === 'CODING') {
-      return 'Ongoing';
-    } else if (startTime > new Date()) {
-      return 'Upcoming';
-    } else {
-      return 'Finished';
-    }
-  };
-
   if (loading) return <div>Loading...</div>;
   console.log(contests.length);
 

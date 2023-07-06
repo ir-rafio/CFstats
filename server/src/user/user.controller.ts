@@ -77,7 +77,7 @@ const parseUser = async (user: User): Promise<ParsedUser> => {
     contestCount: user.contests.length,
     levels: Object.fromEntries(Object.entries(levels).sort()),
     difficulties: Object.fromEntries(Object.entries(difficulties).sort()),
-    tags: Object.fromEntries(Object.entries(tags).sort()),
+    tags: Object.fromEntries(Object.entries(tags).sort((a, b) => b[1] - a[1])),
   };
 
   return parsedUser;

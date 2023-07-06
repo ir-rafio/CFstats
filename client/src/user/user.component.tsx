@@ -58,6 +58,25 @@ const UserComponent = () => {
     contests,
   } = userData;
 
+  const renderTable = (data: Record<string, number>) => {
+    const headers = Object.keys(data);
+
+    return (
+      <Box maxH="200px" overflowY="scroll">
+        <Table variant="simple" borderWidth="1px">
+          <Tbody>
+            {headers.map((header) => (
+              <Tr key={header}>
+                <Td>{header}</Td>
+                <Td>{data[header]}</Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </Box>
+    );
+  };
+
   const renderBarGraph = (data: Record<string, number>) => {
     return (
       <HStack spacing={2} align="center">
@@ -86,7 +105,7 @@ const UserComponent = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {Array.from(contests).map((id) => (
+            {contests.map((id) => (
               <Tr key={id}>
                 <Link href={`../contest/${id}`} isExternal color="blue.500">
                   {id}
@@ -173,6 +192,7 @@ const UserComponent = () => {
 
       <Box>
         <Heading size="md">Levels</Heading>
+        {renderTable(levels)}
         {renderBarGraph(levels)}
       </Box>
 
@@ -180,6 +200,7 @@ const UserComponent = () => {
 
       <Box>
         <Heading size="md">Difficulties</Heading>
+        {renderTable(difficulties)}
         {renderBarGraph(difficulties)}
       </Box>
 
@@ -187,6 +208,7 @@ const UserComponent = () => {
 
       <Box>
         <Heading size="md">Tags</Heading>
+        {renderTable(tags)}
         {renderBarGraph(tags)}
       </Box>
 
@@ -201,7 +223,7 @@ const UserComponent = () => {
 
       <Box>
         <Heading size="md">Contests</Heading>
-        {renderContestTable(Array.from(contests))}
+        {renderContestTable(contests)}
       </Box>
     </VStack>
   );
