@@ -171,7 +171,7 @@ const fetchProblem = async (
   if (!dbProblem) return null;
 
   const { name, difficulty, tags } = dbProblem;
-  return new Problem(contestId, index, name, difficulty, tags);
+  return new Problem(contestId, index, name, tags, difficulty ?? undefined);
 };
 
 export const getProblem = async (
@@ -191,7 +191,13 @@ export const getProblem = async (
   if (!checkRecent(dbProblem.updatedAt, 7200)) return null;
 
   const { name, difficulty, tags } = dbProblem;
-  const problem = new Problem(contestId, index, name, difficulty, tags);
+  const problem = new Problem(
+    contestId,
+    index,
+    name,
+    tags,
+    difficulty ?? undefined
+  );
 
   if (!checkRecent(dbProblem.updatedAt, 7200)) return createProblem(problem);
   return problem;
@@ -203,9 +209,17 @@ export const getProblemMany = async (
   const dbProblems = await prisma.problem.findMany({ where: prismaFilter });
   if (!dbProblems) return null;
 
+  const result = await prisma.problem.aggregate({
+    where: prismaFilter,
+    _min: { updatedAt: true },
+  });
+  const updatedAt = result._min.updatedAt;
+  if (!updatedAt) return null;
+  if (!checkRecent(updatedAt, 7200)) return null;
+
   const problems: Problem[] = dbProblems.map((dbProblem) => {
     const { contestId, index, name, difficulty, tags } = dbProblem;
-    return new Problem(contestId, index, name, difficulty, tags);
+    return new Problem(contestId, index, name, tags, difficulty ?? undefined);
   });
 
   return problems;

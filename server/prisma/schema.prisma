@@ -26,7 +26,7 @@ model Problem {
   contestId  Int
   index      String
   name       String
-  difficulty Int
+  difficulty Int?
   tags       String[]
   updatedAt  DateTime @updatedAt
   contest    Contest  @relation(fields: [contestId], references: [id])

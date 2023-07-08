@@ -4,7 +4,6 @@ import Navbar from './components/Navbar';
 import ContestComponent from './contest/contest-details.component';
 import ContestTable from './contest/contest-table.component';
 import ProblemComponent from './problem/problem.component';
-import './styles.css';
 import UserComponent from './user/user.component';
 
 const App = () => {

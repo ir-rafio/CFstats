@@ -32,7 +32,7 @@ const Navbar = () => {
       <Flex as="ul" listStyleType="none" m={0} p={0} mr="auto">
         <li>
           <Box as="a" href="/" display="flex" alignItems="center" mr={20}>
-            <FaHome size={20} />
+            <FaHome />
           </Box>
         </li>
         <li>

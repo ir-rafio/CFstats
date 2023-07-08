@@ -179,9 +179,8 @@ const parseProblem = (problem: CfProblem): Problem => {
   if (!problem.contestId)
     throw new Error('Invalid problem: contest id is missing!');
 
-  const { contestId, index, name, tags } = problem;
-  const difficulty = problem.rating || 0;
-  return new Problem(contestId, index, name, difficulty, tags);
+  const { contestId, index, name, tags, rating } = problem;
+  return new Problem(contestId, index, name, tags, rating);
 };
 
 export const getProblem = async (
