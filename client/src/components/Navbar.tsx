@@ -1,6 +1,6 @@
 import { Box, Button, Flex, FormControl, Input } from '@chakra-ui/react';
 import { FormEvent } from 'react';
-import { FaHome } from 'react-icons/fa';
+import { FaHome, FaSearch } from 'react-icons/fa';
 
 const Navbar = () => {
   const handleUserSearch = (e: FormEvent<HTMLFormElement>) => {
@@ -32,12 +32,7 @@ const Navbar = () => {
       <Flex as="ul" listStyleType="none" m={0} p={0} mr="auto">
         <li>
           <Box as="a" href="/" display="flex" alignItems="center" mr={20}>
-            <FaHome />
-          </Box>
-        </li>
-        <li>
-          <Box as="a" href="/contest" mr={20}>
-            Upcoming Contests
+            <FaHome size="30px" />
           </Box>
         </li>
       </Flex>
@@ -52,7 +47,7 @@ const Navbar = () => {
             >
               <Input type="text" name="userSearch" placeholder="Search Users" />
               <Button type="submit" ml={2}>
-                Go
+                <FaSearch size="30px" />
               </Button>
             </FormControl>
           </form>
@@ -71,7 +66,7 @@ const Navbar = () => {
                 placeholder="Search Problems"
               />
               <Button type="submit" ml={2}>
-                Go
+                <FaSearch size="30px" />
               </Button>
             </FormControl>
           </form>
@@ -85,7 +80,7 @@ const Navbar = () => {
                 placeholder="Search Contests"
               />
               <Button type="submit" ml={2}>
-                Go
+                <FaSearch size="30px" />
               </Button>
             </FormControl>
           </form>

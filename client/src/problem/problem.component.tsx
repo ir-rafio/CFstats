@@ -29,17 +29,19 @@ const ProblemComponent = () => {
   return (
     <VStack spacing={8} align="start">
       <Box>
-        <Heading size="lg">Problem: {key}</Heading>
+        <Heading size="lg">
+          <Link
+            href={`https://codeforces.com/contest/${contestId}/problem/${index}`}
+          >
+            {name}
+          </Link>
+        </Heading>
         <Text fontWeight="bold">Contest ID:</Text>
-        <Link href={`../contest/${contestId}`} isExternal color="blue.500">
-          {contestId}
-        </Link>
+        <Link href={`../contest/${contestId}`}>{contestId}</Link>
         <Text fontWeight="bold">Index:</Text>
         <Text>{index}</Text>
-        <Text fontWeight="bold">Name:</Text>
-        <Text>{name}</Text>
         <Text fontWeight="bold">Difficulty:</Text>
-        <Text>{difficulty}</Text>
+        <Text>{difficulty ?? 'Unknown'}</Text>
         <Text fontWeight="bold">Tags:</Text>
         <Text>{tags.join(', ')}</Text>
       </Box>

@@ -4,6 +4,7 @@ import { Contest } from '../api/interfaces';
 import {
   Button,
   ButtonGroup,
+  Heading,
   Link,
   Table,
   Tbody,
@@ -45,6 +46,7 @@ const ContestTable = () => {
 
   return (
     <>
+      <Heading size="lg">Contests</Heading>
       <ButtonGroup mb={4}>
         <Button
           colorScheme={mode === 'ONGOING' ? 'teal' : 'gray'}
@@ -71,9 +73,7 @@ const ContestTable = () => {
           {contests.map((contest) => (
             <Tr key={contest.id}>
               <Td>
-                <Link href={`${contest.id}`} isExternal color="blue.500">
-                  {contest.name}
-                </Link>
+                <Link href={`contest/${contest.id}`}>{contest.name}</Link>
               </Td>
               <Td>
                 {contest.startTimeSeconds

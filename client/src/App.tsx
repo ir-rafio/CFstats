@@ -15,18 +15,10 @@ const App = () => {
 
       <BrowserRouter basename="/">
         <Routes>
+          <Route index element={<ContestTable />} />
           <Route path="/user/:handle" element={<UserComponent />} />
           <Route path="/problem/:key" element={<ProblemComponent />} />
-          <Route path="/contest/" element={<ContestTable />} />
           <Route path="/contest/:id" element={<ContestComponent />} />
-          <Route
-            path="/"
-            element={
-              <div className="App">
-                <h1>Welcome to CF Stats</h1>
-              </div>
-            }
-          />
         </Routes>
       </BrowserRouter>
     </>

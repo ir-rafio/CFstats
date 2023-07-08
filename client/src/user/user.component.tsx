@@ -147,9 +147,7 @@ const UserComponent = () => {
           <Tbody>
             {contests.map((id) => (
               <Tr key={id}>
-                <Link href={`../contest/${id}`} isExternal>
-                  {id}
-                </Link>
+                <Link href={`../contest/${id}`}>{id}</Link>
               </Tr>
             ))}
           </Tbody>
