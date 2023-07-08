@@ -278,13 +278,13 @@ export const getContest = async (
 ): Promise<ContestDetails | null> => {
   const dbContest = await prisma.contest.findUnique({
     where: { id },
-    include: { ranks: true },
+    include: { ranks: true, problems: true },
   });
 
   if (!dbContest) return null;
   if (!checkRecent(dbContest.updatedAt, 7200)) return null;
 
-  const { name, type, phase, startTimeSeconds, ranks } = dbContest;
+  const { name, type, phase, startTimeSeconds, ranks, problems } = dbContest;
   const contest: Contest = {
     id,
     name,
@@ -298,9 +298,15 @@ export const getContest = async (
     position: rank.position,
   }));
 
+  const contestProblems: Problem[] = problems.map((problem) => {
+    const { contestId, index, name, tags, difficulty } = problem;
+    return new Problem(contestId, index, name, tags, difficulty ?? undefined);
+  });
+
   return {
     info: contest,
     rank: contestRank,
+    problems: contestProblems,
   };
 };
 

@@ -67,18 +67,20 @@ export const getUpcomingContests = async (
     if (mode === 'ONGOING') {
       return contests.filter((contest) => contest.phase === 'CODING');
     } else if (mode === 'TODAY') {
-      const endOfDay = new Date(
+      const startOfDay = new Date(
         currentTime.getFullYear(),
         currentTime.getMonth(),
-        currentTime.getDate() + 1,
+        currentTime.getDate(),
         0,
         0,
         0
       );
+      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
       return contests.filter(
         (contest) =>
           contest.startTimeSeconds &&
+          new Date(contest.startTimeSeconds * 1000) >= startOfDay &&
           new Date(contest.startTimeSeconds * 1000) < endOfDay
       );
     } else if (mode === 'THIS WEEK') {
@@ -90,24 +92,16 @@ export const getUpcomingContests = async (
         0,
         0
       );
-
       const endOfWeek = new Date(
-        startOfWeek.getFullYear(),
-        startOfWeek.getMonth(),
-        startOfWeek.getDate() + 7,
-        0,
-        0,
-        0
+        startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000
       );
 
-      const filteredContests = contests.filter(
+      return contests.filter(
         (contest) =>
           contest.startTimeSeconds &&
           new Date(contest.startTimeSeconds * 1000) >= startOfWeek &&
           new Date(contest.startTimeSeconds * 1000) < endOfWeek
       );
-
-      return filteredContests;
     } else {
       return contests;
     }

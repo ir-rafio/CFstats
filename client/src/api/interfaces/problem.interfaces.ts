@@ -3,8 +3,8 @@ export class Problem {
     public contestId: number,
     public index: string,
     public name: string,
-    public difficulty: number,
-    public tags: string[]
+    public tags: string[],
+    public difficulty?: number
   ) {}
 
   getKey(): string {

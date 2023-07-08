@@ -248,11 +248,19 @@ export const getContest = async (
       contestId,
       5
     );
+
     const cfContest: CfContest = cfContestStandings['contest'];
     const rankingRows: CfRankListRow[] = cfContestStandings['rows'];
+
+    const problemList: Problem[] = await getProblemList();
+    const problems = problemList.filter(
+      (problem) => problem.contestId === cfContest.id
+    );
+
     return {
       info: parseContest(cfContest),
       rank: parseContestRank(rankingRows),
+      problems,
     };
   } catch (error) {
     console.error('An error occurred:', error);
@@ -268,6 +276,18 @@ export const getContestList = async (): Promise<Contest[]> => {
     return contests;
   } catch (error) {
     console.error('An error occurred:', error);
+    throw new Error('Failed to get contest data');
+  }
+};
+
+export const getContestInfo = async (contestId: number): Promise<Contest> => {
+  try {
+    const cfContests: CfContest[] = await getCfContestList();
+    for (const cfContest of cfContests)
+      if (cfContest.id === contestId) return cfContest;
+    throw new Error('Failed to fetch the contest info');
+  } catch (error) {
+    console.error('An error occurred: ', error);
     throw new Error('Failed to get contest data');
   }
 };

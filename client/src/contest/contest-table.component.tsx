@@ -9,6 +9,8 @@ import {
   Table,
   Tbody,
   Td,
+  Th,
+  Thead,
   Tr,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
@@ -69,6 +71,12 @@ const ContestTable = () => {
       </ButtonGroup>
 
       <Table variant="simple">
+        <Thead>
+          <Tr>
+            <Th>Contest</Th>
+            <Th>Start Time</Th>
+          </Tr>
+        </Thead>
         <Tbody>
           {contests.map((contest) => (
             <Tr key={contest.id}>

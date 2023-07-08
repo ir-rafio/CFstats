@@ -19,7 +19,9 @@ router.get('/many', async (req: Request, res: Response) => {
 
 router.get('/upcoming', async (req: Request, res: Response) => {
   try {
-    const contestList = await getFilteredContests({ phase: 'BEFORE' });
+    const contestList = await getFilteredContests({
+      phase: { not: 'FINISHED' },
+    });
     res.status(200).json(contestList);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });

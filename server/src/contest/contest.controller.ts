@@ -7,6 +7,7 @@ import {
 
 import {
   getContest as getContestFromApi,
+  getContestInfo as getContestInfoFromApi,
   getContestList as getContestListFromApi,
 } from '../api/codeforces/middleware';
 import {
@@ -17,7 +18,21 @@ import {
 export const getContest = async (id: number): Promise<ContestDetails> => {
   try {
     const existingContest = await getContestFromDb(id);
-    if (existingContest) return existingContest;
+    if (
+      existingContest &&
+      (existingContest.info.phase !== 'FINISHED' ||
+        (existingContest.problems.length > 0 &&
+          existingContest.rank.length > 0))
+    )
+      return existingContest;
+
+    const contestInfo = await getContestInfoFromApi(id);
+    if (contestInfo.phase !== 'FINISHED')
+      return {
+        info: contestInfo,
+        rank: [],
+        problems: [],
+      };
 
     const contest = await getContestFromApi(id);
     const createdContest = await createContest(contest);

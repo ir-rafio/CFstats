@@ -1,3 +1,5 @@
+import { Problem } from './problem.interfaces';
+
 export interface ContestRank {
   handle: string;
   position: number;
@@ -18,5 +20,6 @@ export interface Contest {
 
 export interface ContestDetails {
   info: Contest;
+  problems: Problem[];
   rank: ContestRank[];
 }
