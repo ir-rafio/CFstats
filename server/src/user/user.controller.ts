@@ -1,5 +1,5 @@
-import { getUser as getUserFromApi } from '../api/codeforces/middleware';
-import { User } from '../api/codeforces/middleware/interfaces';
+import { getUser as getUserFromApi } from '../api/codeforces';
+import { User } from '../api/codeforces/interfaces';
 import { createUser, getUser as getUserFromDb } from './user.services';
 
 enum CodeforcesRank {

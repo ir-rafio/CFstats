@@ -6,7 +6,7 @@ import {
   ContestDetails,
   ContestRank,
   Problem,
-} from '../api/codeforces/middleware/interfaces';
+} from '../api/codeforces/interfaces';
 
 export const createContest = async (
   contest: ContestDetails

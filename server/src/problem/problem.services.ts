@@ -1,4 +1,4 @@
-import { Problem } from '../api/codeforces/middleware/interfaces';
+import { Problem } from '../api/codeforces/interfaces';
 import prisma from '../prisma';
 import { checkRecent } from '../utils';
 

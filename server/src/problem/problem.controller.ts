@@ -1,8 +1,8 @@
 import {
   getProblem as getProblemFromApi,
   getProblemList as getProblemListFromApi,
-} from '../api/codeforces/middleware';
-import { Problem } from '../api/codeforces/middleware/interfaces';
+} from '../api/codeforces';
+import { Problem } from '../api/codeforces/interfaces';
 import {
   createProblem,
   getProblem as getProblemFromDb,

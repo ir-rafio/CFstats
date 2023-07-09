@@ -1,4 +1,4 @@
-import { User, UserSolution } from '../api/codeforces/middleware/interfaces';
+import { User, UserSolution } from '../api/codeforces/interfaces';
 import prisma from '../prisma';
 import { fetchProblem } from '../problem/problem.services';
 import { checkRecent } from '../utils';

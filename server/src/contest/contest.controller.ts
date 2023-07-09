@@ -9,11 +9,8 @@ import {
   getContest as getContestFromApi,
   getContestInfo as getContestInfoFromApi,
   getContestList as getContestListFromApi,
-} from '../api/codeforces/middleware';
-import {
-  Contest,
-  ContestDetails,
-} from '../api/codeforces/middleware/interfaces';
+} from '../api/codeforces';
+import { Contest, ContestDetails } from '../api/codeforces/interfaces';
 
 export const getContest = async (id: number): Promise<ContestDetails> => {
   try {
