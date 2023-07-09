@@ -11,6 +11,12 @@ export class Problem {
     return Problem.generateKey(this.contestId, this.index);
   }
 
+  getLevel(): string {
+    const { index } = this;
+
+    return index && index[0].match(/[A-Za-z]/) ? index[0].toUpperCase() : '0';
+  }
+
   static generateKey = (contestId: number, index: string): string => {
     return `${contestId}-${index}`;
   };

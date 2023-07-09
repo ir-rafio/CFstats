@@ -25,14 +25,6 @@ export interface ParsedUser extends User {
   tags: Record<string, number>;
 }
 
-const getProblemLevel = (index: string): string => {
-  if (index && index[0].match(/[A-Za-z]/)) {
-    return index[0].toUpperCase();
-  } else {
-    return '0';
-  }
-};
-
 const calculateRank = (rating: number): CodeforcesRank => {
   const rankMap: [number, CodeforcesRank][] = [
     [1200, CodeforcesRank.Newbie],
@@ -57,7 +49,7 @@ const parseUser = async (user: User): Promise<ParsedUser> => {
 
   for (const solution of Object.values(user.solutions)) {
     const problem = solution.problem;
-    const level = getProblemLevel(problem.index);
+    const level = problem.getLevel();
     const difficulty = problem.difficulty ?? 'Unknown';
 
     levels[level] = levels[level] + 1 || 1;
