@@ -3,7 +3,7 @@ import {
   createContestInfo,
   getContest as getContestFromDb,
   getContestMany,
-} from '../prisma';
+} from './contest.services';
 
 import {
   getContest as getContestFromApi,

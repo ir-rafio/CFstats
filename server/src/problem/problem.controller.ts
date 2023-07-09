@@ -7,7 +7,7 @@ import {
   createProblem,
   getProblem as getProblemFromDb,
   getProblemMany,
-} from '../prisma';
+} from './problem.services';
 
 export const getProblem = async (key: string): Promise<Problem> => {
   try {
