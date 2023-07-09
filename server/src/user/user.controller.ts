@@ -57,7 +57,7 @@ const parseUser = async (user: User): Promise<ParsedUser> => {
     for (const tag of problem.tags) tags[tag] = tags[tag] + 1 || 1;
   }
 
-  const { rating, maxRating } = user;
+  const { rating, maxRating, solutions, contests } = user;
   const rank = calculateRank(rating);
   const maxRank = calculateRank(maxRating);
 
@@ -65,9 +65,8 @@ const parseUser = async (user: User): Promise<ParsedUser> => {
     ...user,
     rank,
     maxRank,
-    solutions: user.solutions.sort(
-      (a, b) => b.submissionTime - a.submissionTime
-    ),
+    solutions: solutions.sort((a, b) => b.submissionTime - a.submissionTime),
+    contests: contests.sort((a, b) => (b.startTime ?? 0) - (a.startTime ?? 0)),
     solveCount: Object.keys(user.solutions).length,
     contestCount: user.contests.length,
     levels: Object.fromEntries(Object.entries(levels).sort()),

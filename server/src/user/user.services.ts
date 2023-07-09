@@ -1,4 +1,4 @@
-import { User, UserSolution } from '../api/codeforces/interfaces';
+import { Contest, User, UserSolution } from '../api/codeforces/interfaces';
 import prisma from '../prisma';
 import { fetchProblem } from '../problem/problem.services';
 import { checkRecent } from '../utils';
@@ -18,31 +18,31 @@ export const createUser = async (user: User): Promise<User | null> => {
         registrationTimeSeconds: user.registrationTimeSeconds,
         photoLink: user.photoLink,
       },
-      update: { updatedAt: new Date() },
+      update: {
+        handle: user.handle,
+        name: user.name,
+        country: user.country,
+        city: user.city,
+        organization: user.organization,
+        rating: user.rating,
+        maxRating: user.maxRating,
+        registrationTimeSeconds: user.registrationTimeSeconds,
+        photoLink: user.photoLink,
+        updatedAt: new Date(),
+      },
     });
 
     await prisma.solution.deleteMany({
       where: { userHandle: user.handle },
     });
 
-    await prisma.participation.deleteMany({
-      where: { userHandle: user.handle },
-    });
-
     await prisma.solution.createMany({
-      data: Object.entries(user.solutions).map(([problemKey, solution]) => ({
+      data: Object.entries(user.solutions).map(([_, solution]) => ({
         problemContestId: solution.problem.contestId,
         problemIndex: solution.problem.index,
         submissionTime: solution.submissionTime,
         contestFlag: solution.contestFlag,
         userHandle: user.handle,
-      })),
-    });
-
-    await prisma.participation.createMany({
-      data: Array.from(user.contests).map((contestId) => ({
-        userHandle: user.handle,
-        contestId,
       })),
     });
 
@@ -65,9 +65,11 @@ export const getUser = async (handle: string): Promise<User | null> => {
   if (!dbUser) return null;
   if (!checkRecent(dbUser.updatedAt, 7200)) null;
 
-  const mappedContests: number[] = dbUser.contests.map(
-    (contest) => contest.contestId
-  );
+  const mappedContests: Contest[] = dbUser.contests.map((contest) => {
+    const { id, name, type, phase } = contest;
+    const startTimeSeconds = contest.startTimeSeconds ?? undefined;
+    return { id, name, startTime: startTimeSeconds, type, phase };
+  });
   const mappedSolutions: UserSolution[] = [];
 
   for (const solution of dbUser.solutions) {

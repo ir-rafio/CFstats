@@ -20,7 +20,7 @@ export const createContest = async (
       name: info.name,
       type: info.type,
       phase: info.phase,
-      startTimeSeconds: info.startTimeSeconds,
+      startTimeSeconds: info.startTime,
     },
     update: { updatedAt: new Date() },
   });
@@ -48,7 +48,7 @@ export const createContestInfo = async (
       name: contest.name,
       type: contest.type,
       phase: contest.phase,
-      startTimeSeconds: contest.startTimeSeconds,
+      startTimeSeconds: contest.startTime,
     },
     update: { updatedAt: new Date() },
   });
@@ -73,7 +73,7 @@ export const getContest = async (
     name,
     type,
     phase,
-    startTimeSeconds: startTimeSeconds ?? undefined,
+    startTime: startTimeSeconds ?? undefined,
   };
 
   const contestRank: ContestRank[] = ranks.map((rank) => ({

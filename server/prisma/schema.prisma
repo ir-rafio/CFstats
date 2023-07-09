@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  handle                  String          @id
+  handle                  String     @id
   name                    String
   country                 String?
   city                    String?
@@ -17,8 +17,8 @@ model User {
   maxRating               Int
   registrationTimeSeconds Int
   photoLink               String
-  updatedAt               DateTime        @updatedAt
-  contests                Participation[]
+  updatedAt               DateTime   @updatedAt
+  contests                Contest[]
   solutions               Solution[]
 }
 
@@ -35,14 +35,14 @@ model Problem {
 }
 
 model Contest {
-  id               Int             @id
+  id               Int           @id
   name             String
   startTimeSeconds Int?
   type             ContestType
   phase            ContestPhase
-  updatedAt        DateTime        @updatedAt
+  updatedAt        DateTime      @updatedAt
   ranks            ContestRank[]
-  users            Participation[]
+  users            User[]
   problems         Problem[]
 }
 
@@ -65,15 +65,6 @@ model Solution {
   user             User    @relation(fields: [userHandle], references: [handle])
 
   @@id([userHandle, problemContestId, problemIndex])
-}
-
-model Participation {
-  contestId  Int
-  userHandle String
-  contest    Contest @relation(fields: [contestId], references: [id])
-  user       User    @relation(fields: [userHandle], references: [handle])
-
-  @@id([userHandle, contestId])
 }
 
 enum ContestType {

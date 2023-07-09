@@ -11,7 +11,10 @@ import {
 
 export const getProblem = async (key: string): Promise<Problem> => {
   try {
+    console.log('ASHLAM');
+    console.log(key);
     const { contestId, index } = Problem.parseKey(key);
+    console.log('GELAM');
 
     const existingProblem = await getProblemFromDb(contestId, index);
     if (existingProblem) return existingProblem;

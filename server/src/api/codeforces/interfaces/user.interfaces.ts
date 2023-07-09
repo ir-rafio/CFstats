@@ -1,3 +1,4 @@
+import { Contest } from './contest.interfaces';
 import { Problem } from './problem.interfaces';
 
 export interface UserSolution {
@@ -17,5 +18,5 @@ export interface User {
   registrationTimeSeconds: number;
   photoLink: string;
   solutions: UserSolution[];
-  contests: number[];
+  contests: Contest[];
 }

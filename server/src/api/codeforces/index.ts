@@ -47,13 +47,14 @@ const parseName = (
 
 const getUserRecords = async (
   handle: string
-): Promise<{ solutions: UserSolution[]; contests: number[] }> => {
+): Promise<{ solutions: UserSolution[]; contests: Contest[] }> => {
   try {
     const submissions: CfSubmission[] = await getCfUserSubmissions(handle);
     submissions.sort((a, b) => b.creationTimeSeconds - a.creationTimeSeconds);
 
     const solutionSet: Record<string, UserSolution> = {};
     const contestSet: Set<number> = new Set();
+    const cfContests: CfContest[] = await getCfContestList();
 
     for (const submission of submissions) {
       const problem: CfProblem = submission.problem;
@@ -77,8 +78,10 @@ const getUserRecords = async (
       if (contestFlag && problem.contestId) contestSet.add(problem.contestId);
     }
 
-    const contests: number[] = Array.from(contestSet);
     const solutions: UserSolution[] = Object.values(solutionSet);
+    const contests: Contest[] = cfContests
+      .filter((cfContest) => contestSet.has(cfContest.id))
+      .map((cfContest) => parseContest(cfContest));
 
     return {
       solutions,
@@ -218,9 +221,9 @@ export const getProblemList = async (): Promise<Problem[]> => {
   }
 };
 
-const parseContest = (contest: CfContest) => {
+const parseContest = (contest: CfContest): Contest => {
   const { id, name, type, phase, startTimeSeconds } = contest;
-  return { id, name, type, phase, startTimeSeconds };
+  return { id, name, type, phase, startTime: startTimeSeconds };
 };
 
 const parseContestRank = (rankingRows: CfRankListRow[]) => {
@@ -228,7 +231,7 @@ const parseContestRank = (rankingRows: CfRankListRow[]) => {
 
   for (const row of rankingRows) {
     const { party } = row;
-    const { members } = row.party;
+    const { members } = party;
     const position = row.rank;
 
     for (const member of members) {
