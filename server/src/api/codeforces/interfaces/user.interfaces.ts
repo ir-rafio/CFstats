@@ -3,7 +3,7 @@ import { Problem } from './problem.interfaces';
 
 export interface UserSolution {
   problem: Problem;
-  submissionTime: number;
+  submissionTimeSeconds: number;
   contestFlag: boolean;
 }
 

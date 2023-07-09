@@ -84,8 +84,8 @@ const ContestTable = () => {
                 <Link href={`contest/${contest.id}`}>{contest.name}</Link>
               </Td>
               <Td>
-                {contest.startTime
-                  ? new Date(contest.startTime * 1000).toLocaleString()
+                {contest.startTimeSeconds
+                  ? new Date(contest.startTimeSeconds * 1000).toLocaleString()
                   : 'N/A'}
               </Td>
             </Tr>

@@ -5,8 +5,9 @@ import {
   Contest,
   ContestDetails,
   ContestRank,
-  Problem,
 } from '../api/codeforces/interfaces';
+
+import { Problem } from '../api/codeforces/interfaces/problem.interfaces';
 
 export const createContest = async (
   contest: ContestDetails
@@ -20,9 +21,16 @@ export const createContest = async (
       name: info.name,
       type: info.type,
       phase: info.phase,
-      startTimeSeconds: info.startTime,
+      startTimeSeconds: info.startTimeSeconds,
     },
-    update: { updatedAt: new Date() },
+    update: {
+      id: info.id,
+      name: info.name,
+      type: info.type,
+      phase: info.phase,
+      startTimeSeconds: info.startTimeSeconds,
+      updatedAt: new Date(),
+    },
   });
 
   await prisma.contestRank.deleteMany({ where: { contestId: info.id } });
@@ -48,9 +56,16 @@ export const createContestInfo = async (
       name: contest.name,
       type: contest.type,
       phase: contest.phase,
-      startTimeSeconds: contest.startTime,
+      startTimeSeconds: contest.startTimeSeconds,
     },
-    update: { updatedAt: new Date() },
+    update: {
+      id: contest.id,
+      name: contest.name,
+      type: contest.type,
+      phase: contest.phase,
+      startTimeSeconds: contest.startTimeSeconds,
+      updatedAt: new Date(),
+    },
   });
 
   return dbContest ? contest : null;
@@ -73,7 +88,7 @@ export const getContest = async (
     name,
     type,
     phase,
-    startTime: startTimeSeconds ?? undefined,
+    startTimeSeconds: startTimeSeconds ?? undefined,
   };
 
   const contestRank: ContestRank[] = ranks.map((rank) => ({

@@ -38,7 +38,7 @@ const ContestComponent = () => {
 
   if (!contest) return <div>Loading...</div>;
 
-  const { name, type, phase, startTime } = contest.info;
+  const { name, type, phase, startTimeSeconds } = contest.info;
   const { rank, problems } = contest;
 
   const renderProblemsTable = (problems: Problem[]) => {
@@ -112,8 +112,8 @@ const ContestComponent = () => {
         <Text>{phase}</Text>
         <Text fontWeight="bold">Start Time:</Text>
         <Text>
-          {startTime
-            ? moment(startTime * 1000).format('YYYY-MM-DD HH:mm:ss')
+          {startTimeSeconds
+            ? moment(startTimeSeconds * 1000).format('YYYY-MM-DD HH:mm:ss')
             : 'Not available'}
         </Text>
       </Box>

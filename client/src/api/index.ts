@@ -79,9 +79,9 @@ export const getUpcomingContests = async (
 
       return contests.filter(
         (contest) =>
-          contest.startTime &&
-          new Date(contest.startTime * 1000) >= startOfDay &&
-          new Date(contest.startTime * 1000) < endOfDay
+          contest.startTimeSeconds &&
+          new Date(contest.startTimeSeconds * 1000) >= startOfDay &&
+          new Date(contest.startTimeSeconds * 1000) < endOfDay
       );
     } else if (mode === 'THIS WEEK') {
       const startOfWeek = new Date(
@@ -98,9 +98,9 @@ export const getUpcomingContests = async (
 
       return contests.filter(
         (contest) =>
-          contest.startTime &&
-          new Date(contest.startTime * 1000) >= startOfWeek &&
-          new Date(contest.startTime * 1000) < endOfWeek
+          contest.startTimeSeconds &&
+          new Date(contest.startTimeSeconds * 1000) >= startOfWeek &&
+          new Date(contest.startTimeSeconds * 1000) < endOfWeek
       );
     } else {
       return contests;

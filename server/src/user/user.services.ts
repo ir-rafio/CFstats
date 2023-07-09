@@ -1,10 +1,13 @@
 import { Contest, User, UserSolution } from '../api/codeforces/interfaces';
+import { createContestInfo } from '../contest/contest.services';
 import prisma from '../prisma';
-import { fetchProblem } from '../problem/problem.services';
+import { createProblem, fetchProblem } from '../problem/problem.services';
 import { checkRecent } from '../utils';
 
 export const createUser = async (user: User): Promise<User | null> => {
   try {
+    user.contests.map((contest) => createContestInfo(contest));
+
     await prisma.user.upsert({
       where: { handle: user.handle },
       create: {
@@ -17,6 +20,9 @@ export const createUser = async (user: User): Promise<User | null> => {
         maxRating: user.maxRating,
         registrationTimeSeconds: user.registrationTimeSeconds,
         photoLink: user.photoLink,
+        contests: {
+          connect: user.contests.map((contest) => ({ id: contest.id })),
+        },
       },
       update: {
         handle: user.handle,
@@ -28,6 +34,9 @@ export const createUser = async (user: User): Promise<User | null> => {
         maxRating: user.maxRating,
         registrationTimeSeconds: user.registrationTimeSeconds,
         photoLink: user.photoLink,
+        contests: {
+          connect: user.contests.map((contest) => ({ id: contest.id })),
+        },
         updatedAt: new Date(),
       },
     });
@@ -36,11 +45,15 @@ export const createUser = async (user: User): Promise<User | null> => {
       where: { userHandle: user.handle },
     });
 
+    Object.entries(user.solutions).map(([_, solution]) => {
+      createProblem(solution.problem);
+    });
+
     await prisma.solution.createMany({
       data: Object.entries(user.solutions).map(([_, solution]) => ({
         problemContestId: solution.problem.contestId,
         problemIndex: solution.problem.index,
-        submissionTime: solution.submissionTime,
+        submissionTimeSeconds: solution.submissionTimeSeconds,
         contestFlag: solution.contestFlag,
         userHandle: user.handle,
       })),
@@ -68,19 +81,19 @@ export const getUser = async (handle: string): Promise<User | null> => {
   const mappedContests: Contest[] = dbUser.contests.map((contest) => {
     const { id, name, type, phase } = contest;
     const startTimeSeconds = contest.startTimeSeconds ?? undefined;
-    return { id, name, startTime: startTimeSeconds, type, phase };
+    return { id, name, startTimeSeconds: startTimeSeconds, type, phase };
   });
   const mappedSolutions: UserSolution[] = [];
 
   for (const solution of dbUser.solutions) {
-    const { submissionTime, contestFlag } = solution;
+    const { submissionTimeSeconds, contestFlag } = solution;
     const contestId = solution.problemContestId;
     const index = solution.problemIndex;
 
     const problem = await fetchProblem(contestId, index);
     if (!problem) continue;
 
-    mappedSolutions.push({ problem, submissionTime, contestFlag });
+    mappedSolutions.push({ problem, submissionTimeSeconds, contestFlag });
   }
 
   return {

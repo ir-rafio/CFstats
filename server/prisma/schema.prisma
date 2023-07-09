@@ -57,12 +57,12 @@ model ContestRank {
 }
 
 model Solution {
-  userHandle       String
-  problemContestId Int
-  problemIndex     String
-  submissionTime   Int
-  contestFlag      Boolean
-  user             User    @relation(fields: [userHandle], references: [handle])
+  userHandle            String
+  problemContestId      Int
+  problemIndex          String
+  submissionTimeSeconds Int
+  contestFlag           Boolean
+  user                  User    @relation(fields: [userHandle], references: [handle])
 
   @@id([userHandle, problemContestId, problemIndex])
 }

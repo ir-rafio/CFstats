@@ -2,7 +2,7 @@ import {
   getProblem as getProblemFromApi,
   getProblemList as getProblemListFromApi,
 } from '../api/codeforces';
-import { Problem } from '../api/codeforces/interfaces';
+import { Problem } from '../api/codeforces/interfaces/problem.interfaces';
 import {
   createProblem,
   getProblem as getProblemFromDb,
@@ -11,10 +11,8 @@ import {
 
 export const getProblem = async (key: string): Promise<Problem> => {
   try {
-    console.log('ASHLAM');
     console.log(key);
     const { contestId, index } = Problem.parseKey(key);
-    console.log('GELAM');
 
     const existingProblem = await getProblemFromDb(contestId, index);
     if (existingProblem) return existingProblem;

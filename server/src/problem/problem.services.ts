@@ -1,32 +1,47 @@
-import { Problem } from '../api/codeforces/interfaces';
+import { Problem } from '../api/codeforces/interfaces/problem.interfaces';
 import prisma from '../prisma';
 import { checkRecent } from '../utils';
 
 export const createProblem = async (
   problem: Problem
 ): Promise<Problem | null> => {
-  const { contestId, index, name, difficulty, tags } = problem;
+  try {
+    const { contestId, index, name, difficulty, tags } = problem;
 
-  const dbProblem = await prisma.problem.upsert({
-    where: {
-      contestId_index: {
+    const dbProblem = await prisma.problem.upsert({
+      where: {
+        contestId_index: {
+          contestId,
+          index,
+        },
+      },
+      create: {
         contestId,
         index,
+        name,
+        difficulty,
+        tags: {
+          set: tags,
+        },
       },
-    },
-    create: {
-      contestId,
-      index,
-      name,
-      difficulty,
-      tags: {
-        set: tags,
+      update: {
+        contestId,
+        index,
+        name,
+        difficulty,
+        tags: {
+          set: tags,
+        },
+        updatedAt: new Date(),
       },
-    },
-    update: { updatedAt: new Date() },
-  });
+    });
 
-  return dbProblem ? problem : null;
+    return dbProblem ? problem : null;
+  } catch (error) {
+    console.log(problem.getKey());
+    console.error(error);
+    throw new Error('Failed to create problem in the database.');
+  }
 };
 
 export const fetchProblem = async (

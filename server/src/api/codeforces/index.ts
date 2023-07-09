@@ -5,7 +5,7 @@ import {
   getCfUserList,
   getCfUserSubmissions,
   getContestStandings,
-} from './middleware';
+} from './service';
 
 import {
   CfContest,
@@ -15,16 +15,18 @@ import {
   CfRankListRow,
   CfSubmission,
   CfUser,
-} from './middleware/interfaces';
+} from './service/interfaces';
 
 import {
   Contest,
   ContestDetails,
   ContestRank,
-  Problem,
+  // Problem,
   User,
   UserSolution,
 } from './interfaces';
+
+import { Problem } from './interfaces/problem.interfaces';
 
 const parseName = (
   firstName: string | undefined,
@@ -69,7 +71,7 @@ const getUserRecords = async (
 
       const solution: UserSolution = {
         problem: parseProblem(problem),
-        submissionTime: submission.creationTimeSeconds,
+        submissionTimeSeconds: submission.creationTimeSeconds,
         contestFlag,
       };
 
@@ -223,7 +225,7 @@ export const getProblemList = async (): Promise<Problem[]> => {
 
 const parseContest = (contest: CfContest): Contest => {
   const { id, name, type, phase, startTimeSeconds } = contest;
-  return { id, name, type, phase, startTime: startTimeSeconds };
+  return { id, name, type, phase, startTimeSeconds: startTimeSeconds };
 };
 
 const parseContestRank = (rankingRows: CfRankListRow[]) => {

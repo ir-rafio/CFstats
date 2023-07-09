@@ -65,8 +65,12 @@ const parseUser = async (user: User): Promise<ParsedUser> => {
     ...user,
     rank,
     maxRank,
-    solutions: solutions.sort((a, b) => b.submissionTime - a.submissionTime),
-    contests: contests.sort((a, b) => (b.startTime ?? 0) - (a.startTime ?? 0)),
+    solutions: solutions.sort(
+      (a, b) => b.submissionTimeSeconds - a.submissionTimeSeconds
+    ),
+    contests: contests.sort(
+      (a, b) => (b.startTimeSeconds ?? 0) - (a.startTimeSeconds ?? 0)
+    ),
     solveCount: Object.keys(user.solutions).length,
     contestCount: user.contests.length,
     levels: Object.fromEntries(Object.entries(levels).sort()),

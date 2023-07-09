@@ -4,6 +4,7 @@ import {
   Flex,
   Heading,
   Link,
+  Stack,
   Table,
   Tbody,
   Td,
@@ -137,7 +138,7 @@ const UserComponent = () => {
 
   const renderContestTable = (contests: Contest[]) => {
     return (
-      <Box maxH="400px" overflowY="scroll">
+      <Box maxH="400px" overflowY="scroll" width="100%">
         <Table>
           <Thead>
             <Tr>
@@ -151,7 +152,12 @@ const UserComponent = () => {
                 <Td>
                   <Link href={`../contest/${contest.id}`}>{contest.id}</Link>
                 </Td>
-                <Td>{contest.startTime}</Td>
+                <Td>
+                  {contest.startTimeSeconds &&
+                    moment(contest.startTimeSeconds * 1000).format(
+                      'YYYY-MM-DD HH:mm:ss'
+                    )}
+                </Td>
               </Tr>
             ))}
           </Tbody>
@@ -162,7 +168,7 @@ const UserComponent = () => {
 
   const renderSolutionsTable = (solutions: UserSolution[]) => {
     return (
-      <Box maxH="400px" overflowY="scroll">
+      <Box maxH="400px" overflowY="scroll" width="100%">
         <Table>
           <Thead>
             <Tr>
@@ -185,7 +191,7 @@ const UserComponent = () => {
                     <Link href={`../problem/${problemKey}`}>{problemKey}</Link>
                   </Td>
                   <Td>
-                    {moment(solution.submissionTime * 1000).format(
+                    {moment(solution.submissionTimeSeconds * 1000).format(
                       'YYYY-MM-DD HH:mm:ss'
                     )}
                   </Td>
@@ -200,70 +206,66 @@ const UserComponent = () => {
   };
 
   return (
-    <VStack spacing={8} align="start">
-      <Box display="flex" alignItems="center">
-        <Flex mr="auto">
-          <Box>
-            <img src={photoLink} alt="User" />
-            <Heading size="lg">
-              <Link href={'https://codeforces.com/profile/' + handle}>
-                {handle}
-              </Link>
-            </Heading>
-            <Text>{name}</Text>
-          </Box>
+    <VStack spacing={8} align="start" width="100%">
+      <Stack direction="row" spacing="auto" width="100%">
+        <Box width="25%">
+          <img src={photoLink} alt="User" />
+          <Heading size="lg">
+            <Link href={'https://codeforces.com/profile/' + handle}>
+              {handle}
+            </Link>
+          </Heading>
+          <Text>{name}</Text>
+        </Box>
 
-          <Box ml="auto">
-            {organization && (
-              <>
-                <Text fontWeight="bold">Organization: </Text>
-                <Text>{organization}</Text>
-              </>
-            )}
-            {city && (
-              <>
-                <Text fontWeight="bold">City: </Text>
-                <Text>{city}</Text>
-              </>
-            )}
-            {country && (
-              <>
-                <Text fontWeight="bold">Country: </Text>
-                <Text>{country}</Text>
-              </>
-            )}
-            <Text fontWeight="bold">Rating: </Text>
-            <Text color={rankColors[rank].color2} bg={rankColors[rank].color1}>
-              {rating} - {rank}
-            </Text>
-            <Text fontWeight="bold">Max Rating: </Text>
-            <Text
-              color={rankColors[maxRank].color2}
-              bg={rankColors[maxRank].color1}
-            >
-              {maxRating} - {maxRank}
-            </Text>
-            <Text fontWeight="bold">Registered: </Text>
-            <Text>{moment(registrationTimeSeconds * 1000).fromNow()}</Text>
-            <Text fontWeight="bold">Solve Count: </Text>
-            <Text>{solveCount}</Text>
-            <Text fontWeight="bold">Contest Count: </Text>
-            <Text>{contestCount}</Text>
-          </Box>
-        </Flex>
+        <Box width="20%">
+          {organization && (
+            <>
+              <Text fontWeight="bold">Organization: </Text>
+              <Text>{organization}</Text>
+            </>
+          )}
+          {city && (
+            <>
+              <Text fontWeight="bold">City: </Text>
+              <Text>{city}</Text>
+            </>
+          )}
+          {country && (
+            <>
+              <Text fontWeight="bold">Country: </Text>
+              <Text>{country}</Text>
+            </>
+          )}
+          <Text fontWeight="bold">Rating: </Text>
+          <Text color={rankColors[rank].color2} bg={rankColors[rank].color1}>
+            {rating} - {rank}
+          </Text>
+          <Text fontWeight="bold">Max Rating: </Text>
+          <Text
+            color={rankColors[maxRank].color2}
+            bg={rankColors[maxRank].color1}
+          >
+            {maxRating} - {maxRank}
+          </Text>
+          <Text fontWeight="bold">Registered: </Text>
+          <Text>{moment(registrationTimeSeconds * 1000).fromNow()}</Text>
+          <Text fontWeight="bold">Solve Count: </Text>
+          <Text>{solveCount}</Text>
+          <Text fontWeight="bold">Contest Count: </Text>
+          <Text>{contestCount}</Text>
+        </Box>
 
-        <Flex>
-          <Box ml="auto">
-            <Heading size="md">Solutions</Heading>
-            {renderSolutionsTable(solutions)}
-          </Box>
+        <Box width="30%">
+          <Heading size="md">Solutions</Heading>
+          {renderSolutionsTable(solutions)}
+        </Box>
 
-          <Box ml="auto">
-            <Heading size="md">Contests</Heading>
-            {renderContestTable(contests)}
-          </Box>
-        </Flex>
-      </Box>
+        <Box width="25%">
+          <Heading size="md">Contests</Heading>
+          {renderContestTable(contests)}
+        </Box>
+      </Stack>
 
       <Divider />
 

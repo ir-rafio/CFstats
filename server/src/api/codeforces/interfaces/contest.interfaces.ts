@@ -15,7 +15,7 @@ export interface Contest {
     | 'PENDING_SYSTEM_TEST'
     | 'SYSTEM_TEST'
     | 'FINISHED';
-  startTime?: number;
+  startTimeSeconds?: number;
 }
 
 export interface ContestDetails {
