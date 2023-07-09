@@ -180,8 +180,9 @@ const UserComponent = () => {
           <Tbody>
             {solutions.map((solution) => {
               const problem = solution.problem;
+              // const problemKey = problem.getKey();
               const problemKey = Problem.generateKey(
-                problem.contestId,
+                problem.contest.id,
                 problem.index
               );
 

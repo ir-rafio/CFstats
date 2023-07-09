@@ -28,6 +28,162 @@ import {
 
 import { Problem } from './interfaces/problem.interfaces';
 
+const parseContest = (contest: CfContest): Contest => {
+  const { id, name, type, phase, startTimeSeconds } = contest;
+  return { id, name, type, phase, startTimeSeconds: startTimeSeconds };
+};
+
+const parseContestRank = (rankingRows: CfRankListRow[]) => {
+  let rank: ContestRank[] = [];
+
+  for (const row of rankingRows) {
+    const { party } = row;
+    const { members } = party;
+    const position = row.rank;
+
+    for (const member of members) {
+      const { handle } = member;
+      rank.push({ handle, position });
+    }
+  }
+
+  return rank;
+};
+
+export const getContest = async (
+  contestId: number
+): Promise<ContestDetails> => {
+  try {
+    const cfContestStandings: CfContestStandings = await getContestStandings(
+      contestId,
+      5
+    );
+
+    const cfContest: CfContest = cfContestStandings['contest'];
+    const rankingRows: CfRankListRow[] = cfContestStandings['rows'];
+
+    const problemList: Problem[] = await getProblemList();
+    const problems = problemList.filter(
+      (problem) => problem.contest.id === cfContest.id
+    );
+
+    return {
+      info: parseContest(cfContest),
+      rank: parseContestRank(rankingRows),
+      problems,
+    };
+  } catch (error) {
+    console.error('An error occurred:', error);
+    throw new Error('Failed to get contest data');
+  }
+};
+
+export const getContestList = async (): Promise<Contest[]> => {
+  try {
+    const cfContests: CfContest[] = await getCfContestList();
+    let contests: Contest[] = [];
+    for (const cfContest of cfContests) contests.push(parseContest(cfContest));
+    return contests;
+  } catch (error) {
+    console.error('An error occurred:', error);
+    throw new Error('Failed to get contest data');
+  }
+};
+
+export const getContestInfo = async (contestId: number): Promise<Contest> => {
+  try {
+    const cfContests: CfContest[] = await getCfContestList();
+    for (const cfContest of cfContests)
+      if (cfContest.id === contestId) return cfContest;
+    throw new Error('Failed to fetch the contest info');
+  } catch (error) {
+    console.error('An error occurred: ', error);
+    throw new Error('Failed to get contest data');
+  }
+};
+
+class ContestFacade {
+  private dict: { [id: number]: Contest };
+
+  constructor() {
+    this.dict = {};
+  }
+
+  async init(): Promise<void> {
+    const contestList = await getContestList();
+    for (const contest of contestList) this.dict[contest.id] = contest;
+  }
+
+  get(id: number): Contest | null {
+    return this.dict[id] || null;
+  }
+
+  getAll(): Contest[] {
+    return Object.values(this.dict);
+  }
+
+  getSome(ids: number[]): Contest[] {
+    return ids.map((id) => this.dict[id]);
+  }
+}
+
+const contestFacade = new ContestFacade();
+
+const parseProblem = (problem: CfProblem, contest: Contest): Problem => {
+  if (!problem.contestId)
+    throw new Error('Invalid problem: contest id is missing!');
+
+  const { index, name, tags, rating } = problem;
+  return new Problem(contest, index, name, tags, rating);
+};
+
+export const getProblem = async (
+  contestId: number,
+  index: string
+): Promise<Problem> => {
+  try {
+    const cfContestStandings: CfContestStandings = await getContestStandings(
+      contestId,
+      1
+    );
+    const cfContestProblems: CfProblem[] = cfContestStandings['problems'];
+    const cfContest: CfContest = cfContestStandings['contest'];
+    const contest: Contest = parseContest(cfContest);
+
+    for (const problem of cfContestProblems)
+      if (problem.index === index) return parseProblem(problem, contest);
+    throw new Error('Problem not found!');
+  } catch (error) {
+    console.error('An error occurred:', error);
+    throw new Error('Failed to get problem data');
+  }
+};
+
+export const getProblemList = async (): Promise<Problem[]> => {
+  try {
+    const cfProblemSet: CfProblemSet = await getCfProblemSet();
+    const cfProblems: CfProblem[] = cfProblemSet['problems'];
+
+    let problems: Problem[] = [];
+    await contestFacade.init();
+
+    for (const problem of cfProblems) {
+      const { contestId } = problem;
+      if (!contestId) continue;
+
+      const contest = contestFacade.get(contestId);
+      if (!contest) continue;
+
+      problems.push(parseProblem(problem, contest));
+    }
+
+    return problems;
+  } catch (error) {
+    console.error('An error occurred:', error);
+    throw new Error('Failed to get problem data');
+  }
+};
+
 const parseName = (
   firstName: string | undefined,
   lastName: string | undefined
@@ -56,7 +212,7 @@ const getUserRecords = async (
 
     const solutionSet: Record<string, UserSolution> = {};
     const contestSet: Set<number> = new Set();
-    const cfContests: CfContest[] = await getCfContestList();
+    await contestFacade.init();
 
     for (const submission of submissions) {
       const problem: CfProblem = submission.problem;
@@ -65,12 +221,15 @@ const getUserRecords = async (
       if (!problem.contestId) continue;
 
       const contestId = problem.contestId;
+      const contest = contestFacade.get(contestId);
+      if (!contest) continue;
+
       const problemKey = `${contestId}-${problem.index}`;
       const contestFlag: boolean =
         submission.author.participantType === 'CONTESTANT';
 
       const solution: UserSolution = {
-        problem: parseProblem(problem),
+        problem: parseProblem(problem, contest),
         submissionTimeSeconds: submission.creationTimeSeconds,
         contestFlag,
       };
@@ -81,13 +240,10 @@ const getUserRecords = async (
     }
 
     const solutions: UserSolution[] = Object.values(solutionSet);
-    const contests: Contest[] = cfContests
-      .filter((cfContest) => contestSet.has(cfContest.id))
-      .map((cfContest) => parseContest(cfContest));
 
     return {
       solutions,
-      contests,
+      contests: contestFacade.getSome(Array.from(contestSet)),
     };
   } catch (error) {
     console.error('An error occurred:', error);
@@ -177,122 +333,5 @@ export const getUserList = async (
   } catch (error) {
     console.error('An error occurred:', error);
     throw new Error('Failed to get user data');
-  }
-};
-
-const parseProblem = (problem: CfProblem): Problem => {
-  if (!problem.contestId)
-    throw new Error('Invalid problem: contest id is missing!');
-
-  const { contestId, index, name, tags, rating } = problem;
-  return new Problem(contestId, index, name, tags, rating);
-};
-
-export const getProblem = async (
-  contestId: number,
-  index: string
-): Promise<Problem> => {
-  try {
-    const cfContestStandings: CfContestStandings = await getContestStandings(
-      contestId,
-      1
-    );
-    const cfContestProblems: CfProblem[] = cfContestStandings['problems'];
-
-    for (const problem of cfContestProblems)
-      if (problem.index === index) return parseProblem(problem);
-    throw new Error('Problem not found!');
-  } catch (error) {
-    console.error('An error occurred:', error);
-    throw new Error('Failed to get problem data');
-  }
-};
-
-export const getProblemList = async (): Promise<Problem[]> => {
-  try {
-    const cfProblemSet: CfProblemSet = await getCfProblemSet();
-    const cfProblems: CfProblem[] = cfProblemSet['problems'];
-
-    let problems: Problem[] = [];
-    for (const problem of cfProblems) problems.push(parseProblem(problem));
-
-    return problems;
-  } catch (error) {
-    console.error('An error occurred:', error);
-    throw new Error('Failed to get problem data');
-  }
-};
-
-const parseContest = (contest: CfContest): Contest => {
-  const { id, name, type, phase, startTimeSeconds } = contest;
-  return { id, name, type, phase, startTimeSeconds: startTimeSeconds };
-};
-
-const parseContestRank = (rankingRows: CfRankListRow[]) => {
-  let rank: ContestRank[] = [];
-
-  for (const row of rankingRows) {
-    const { party } = row;
-    const { members } = party;
-    const position = row.rank;
-
-    for (const member of members) {
-      const { handle } = member;
-      rank.push({ handle, position });
-    }
-  }
-
-  return rank;
-};
-
-export const getContest = async (
-  contestId: number
-): Promise<ContestDetails> => {
-  try {
-    const cfContestStandings: CfContestStandings = await getContestStandings(
-      contestId,
-      5
-    );
-
-    const cfContest: CfContest = cfContestStandings['contest'];
-    const rankingRows: CfRankListRow[] = cfContestStandings['rows'];
-
-    const problemList: Problem[] = await getProblemList();
-    const problems = problemList.filter(
-      (problem) => problem.contestId === cfContest.id
-    );
-
-    return {
-      info: parseContest(cfContest),
-      rank: parseContestRank(rankingRows),
-      problems,
-    };
-  } catch (error) {
-    console.error('An error occurred:', error);
-    throw new Error('Failed to get contest data');
-  }
-};
-
-export const getContestList = async (): Promise<Contest[]> => {
-  try {
-    const cfContests: CfContest[] = await getCfContestList();
-    let contests: Contest[] = [];
-    for (const cfContest of cfContests) contests.push(parseContest(cfContest));
-    return contests;
-  } catch (error) {
-    console.error('An error occurred:', error);
-    throw new Error('Failed to get contest data');
-  }
-};
-
-export const getContestInfo = async (contestId: number): Promise<Contest> => {
-  try {
-    const cfContests: CfContest[] = await getCfContestList();
-    for (const cfContest of cfContests)
-      if (cfContest.id === contestId) return cfContest;
-    throw new Error('Failed to fetch the contest info');
-  } catch (error) {
-    console.error('An error occurred: ', error);
-    throw new Error('Failed to get contest data');
   }
 };

@@ -11,7 +11,6 @@ import {
 
 export const getProblem = async (key: string): Promise<Problem> => {
   try {
-    console.log(key);
     const { contestId, index } = Problem.parseKey(key);
 
     const existingProblem = await getProblemFromDb(contestId, index);

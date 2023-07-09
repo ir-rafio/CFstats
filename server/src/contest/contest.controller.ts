@@ -12,6 +12,13 @@ import {
 } from '../api/codeforces';
 import { Contest, ContestDetails } from '../api/codeforces/interfaces';
 
+const parseContest = (contest: ContestDetails): ContestDetails => {
+  const { problems } = contest;
+  problems.sort((a, b) => a.index.localeCompare(b.index));
+
+  return { ...contest, problems };
+};
+
 export const getContest = async (id: number): Promise<ContestDetails> => {
   try {
     const existingContest = await getContestFromDb(id);
@@ -21,25 +28,25 @@ export const getContest = async (id: number): Promise<ContestDetails> => {
         (existingContest.problems.length > 0 &&
           existingContest.rank.length > 0))
     )
-      return existingContest;
+      return parseContest(existingContest);
 
     const contestInfo = await getContestInfoFromApi(id);
     if (contestInfo.phase !== 'FINISHED')
-      return {
+      return parseContest({
         info: contestInfo,
         rank: [],
         problems: [],
-      };
+      });
 
     const contest = await getContestFromApi(id);
     const createdContest = await createContest(contest);
 
     if (!createdContest) {
       console.error(`Failed to add contest ${contest.info.id} to the database`);
-      return contest;
+      return parseContest(contest);
     }
 
-    return createdContest;
+    return parseContest(createdContest);
   } catch (error) {
     console.error(error);
     throw new Error('Failed to fetch the contest from the API.');

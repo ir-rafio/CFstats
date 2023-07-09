@@ -1,4 +1,5 @@
 import { Problem } from '../api/codeforces/interfaces/problem.interfaces';
+import { createContestInfo } from '../contest/contest.services';
 import prisma from '../prisma';
 import { checkRecent } from '../utils';
 
@@ -6,17 +7,18 @@ export const createProblem = async (
   problem: Problem
 ): Promise<Problem | null> => {
   try {
-    const { contestId, index, name, difficulty, tags } = problem;
+    await createContestInfo(problem.contest);
+    const { contest, index, name, difficulty, tags } = problem;
 
     const dbProblem = await prisma.problem.upsert({
       where: {
         contestId_index: {
-          contestId,
+          contestId: contest.id,
           index,
         },
       },
       create: {
-        contestId,
+        contestId: contest.id,
         index,
         name,
         difficulty,
@@ -25,7 +27,7 @@ export const createProblem = async (
         },
       },
       update: {
-        contestId,
+        contestId: contest.id,
         index,
         name,
         difficulty,
@@ -38,9 +40,10 @@ export const createProblem = async (
 
     return dbProblem ? problem : null;
   } catch (error) {
-    console.log(problem.getKey());
     console.error(error);
-    throw new Error('Failed to create problem in the database.');
+    throw new Error(
+      `Failed to create problem in the database: ${problem.getKey()}`
+    );
   }
 };
 
@@ -55,12 +58,24 @@ export const fetchProblem = async (
         index,
       },
     },
+    include: {
+      contest: true,
+    },
   });
 
   if (!dbProblem) return null;
 
   const { name, difficulty, tags } = dbProblem;
-  return new Problem(contestId, index, name, tags, difficulty ?? undefined);
+  const { phase, startTimeSeconds, type } = dbProblem.contest;
+  const contestName = dbProblem.contest.name;
+  const contest = {
+    id: contestId,
+    name: contestName,
+    phase,
+    startTimeSeconds: startTimeSeconds ?? undefined,
+    type,
+  };
+  return new Problem(contest, index, name, tags, difficulty ?? undefined);
 };
 
 export const getProblem = async (
@@ -74,28 +89,34 @@ export const getProblem = async (
         index,
       },
     },
+    include: {
+      contest: true,
+    },
   });
 
   if (!dbProblem) return null;
   if (!checkRecent(dbProblem.updatedAt, 7200)) return null;
 
   const { name, difficulty, tags } = dbProblem;
-  const problem = new Problem(
-    contestId,
-    index,
-    name,
-    tags,
-    difficulty ?? undefined
-  );
-
-  if (!checkRecent(dbProblem.updatedAt, 7200)) return createProblem(problem);
-  return problem;
+  const { phase, startTimeSeconds, type } = dbProblem.contest;
+  const contestName = dbProblem.contest.name;
+  const contest = {
+    id: contestId,
+    name: contestName,
+    phase,
+    startTimeSeconds: startTimeSeconds ?? undefined,
+    type,
+  };
+  return new Problem(contest, index, name, tags, difficulty ?? undefined);
 };
 
 export const getProblemMany = async (
   prismaFilter: object
 ): Promise<Problem[] | null> => {
-  const dbProblems = await prisma.problem.findMany({ where: prismaFilter });
+  const dbProblems = await prisma.problem.findMany({
+    where: prismaFilter,
+    include: { contest: true },
+  });
   if (!dbProblems) return null;
 
   const result = await prisma.problem.aggregate({
@@ -108,7 +129,16 @@ export const getProblemMany = async (
 
   const problems: Problem[] = dbProblems.map((dbProblem) => {
     const { contestId, index, name, difficulty, tags } = dbProblem;
-    return new Problem(contestId, index, name, tags, difficulty ?? undefined);
+    const { phase, startTimeSeconds, type } = dbProblem.contest;
+    const contestName = dbProblem.contest.name;
+    const contest = {
+      id: contestId,
+      name: contestName,
+      phase,
+      startTimeSeconds: startTimeSeconds ?? undefined,
+      type,
+    };
+    return new Problem(contest, index, name, tags, difficulty ?? undefined);
   });
 
   return problems;

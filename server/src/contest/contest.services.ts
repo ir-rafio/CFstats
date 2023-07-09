@@ -8,67 +8,81 @@ import {
 } from '../api/codeforces/interfaces';
 
 import { Problem } from '../api/codeforces/interfaces/problem.interfaces';
+import { createProblem } from '../problem/problem.services';
 
 export const createContest = async (
   contest: ContestDetails
 ): Promise<ContestDetails | null> => {
-  const { info, rank } = contest;
+  try {
+    const { info, rank, problems } = contest;
 
-  const dbContest = await prisma.contest.upsert({
-    where: { id: info.id },
-    create: {
-      id: info.id,
-      name: info.name,
-      type: info.type,
-      phase: info.phase,
-      startTimeSeconds: info.startTimeSeconds,
-    },
-    update: {
-      id: info.id,
-      name: info.name,
-      type: info.type,
-      phase: info.phase,
-      startTimeSeconds: info.startTimeSeconds,
-      updatedAt: new Date(),
-    },
-  });
+    const dbContest = await prisma.contest.upsert({
+      where: { id: info.id },
+      create: {
+        id: info.id,
+        name: info.name,
+        type: info.type,
+        phase: info.phase,
+        startTimeSeconds: info.startTimeSeconds,
+      },
+      update: {
+        id: info.id,
+        name: info.name,
+        type: info.type,
+        phase: info.phase,
+        startTimeSeconds: info.startTimeSeconds,
+        updatedAt: new Date(),
+      },
+    });
 
-  await prisma.contestRank.deleteMany({ where: { contestId: info.id } });
+    await prisma.contestRank.deleteMany({ where: { contestId: info.id } });
+    await prisma.contestRank.createMany({
+      data: rank.map((contestRank) => ({
+        contestId: dbContest.id,
+        position: contestRank.position,
+        userHandle: contestRank.handle,
+      })),
+    });
 
-  await prisma.contestRank.createMany({
-    data: rank.map((contestRank) => ({
-      contestId: dbContest.id,
-      position: contestRank.position,
-      userHandle: contestRank.handle,
-    })),
-  });
+    problems.map(async (problem) => await createProblem(problem));
 
-  return getContest(dbContest.id);
+    return getContest(dbContest.id);
+  } catch (error) {
+    console.error(error);
+    throw new Error(
+      `Failed to create contest in the database: ${contest.info.id}`
+    );
+  }
 };
 
 export const createContestInfo = async (
   contest: Contest
 ): Promise<Contest | null> => {
-  const dbContest = await prisma.contest.upsert({
-    where: { id: contest.id },
-    create: {
-      id: contest.id,
-      name: contest.name,
-      type: contest.type,
-      phase: contest.phase,
-      startTimeSeconds: contest.startTimeSeconds,
-    },
-    update: {
-      id: contest.id,
-      name: contest.name,
-      type: contest.type,
-      phase: contest.phase,
-      startTimeSeconds: contest.startTimeSeconds,
-      updatedAt: new Date(),
-    },
-  });
+  try {
+    const dbContest = await prisma.contest.upsert({
+      where: { id: contest.id },
+      create: {
+        id: contest.id,
+        name: contest.name,
+        type: contest.type,
+        phase: contest.phase,
+        startTimeSeconds: contest.startTimeSeconds,
+      },
+      update: {
+        id: contest.id,
+        name: contest.name,
+        type: contest.type,
+        phase: contest.phase,
+        startTimeSeconds: contest.startTimeSeconds,
+        updatedAt: new Date(),
+      },
+    });
 
-  return dbContest ? contest : null;
+    return dbContest ? contest : null;
+  } catch (error) {
+    console.error(error);
+    throw new Error(`Failed to create contest in the database: ${contest.id}`);
+  }
 };
 
 export const getContest = async (
@@ -97,8 +111,8 @@ export const getContest = async (
   }));
 
   const contestProblems: Problem[] = problems.map((problem) => {
-    const { contestId, index, name, tags, difficulty } = problem;
-    return new Problem(contestId, index, name, tags, difficulty ?? undefined);
+    const { index, name, tags, difficulty } = problem;
+    return new Problem(contest, index, name, tags, difficulty ?? undefined);
   });
 
   return {

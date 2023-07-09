@@ -64,7 +64,7 @@ const ContestComponent = () => {
                   <Td>
                     <Link href={`../problem/${key}`}>{name}</Link>
                   </Td>
-                  <Td>{difficulty}</Td>
+                  <Td>{difficulty ?? 'Unknown'}</Td>
                   <Td>{tags.join(', ')}</Td>
                 </Tr>
               );
@@ -110,12 +110,14 @@ const ContestComponent = () => {
         <Text>{type}</Text>
         <Text fontWeight="bold">Phase:</Text>
         <Text>{phase}</Text>
-        <Text fontWeight="bold">Start Time:</Text>
-        <Text>
-          {startTimeSeconds
-            ? moment(startTimeSeconds * 1000).format('YYYY-MM-DD HH:mm:ss')
-            : 'Not available'}
-        </Text>
+        {startTimeSeconds && (
+          <>
+            <Text fontWeight="bold">Time:</Text>
+            <Text>
+              {moment(startTimeSeconds * 1000).format('YYYY-MM-DD HH:mm:ss')}
+            </Text>
+          </>
+        )}
       </Box>
       {problems.length > 0 && (
         <>

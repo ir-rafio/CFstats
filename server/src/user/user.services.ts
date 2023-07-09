@@ -6,63 +6,77 @@ import { checkRecent } from '../utils';
 
 export const createUser = async (user: User): Promise<User | null> => {
   try {
-    user.contests.map((contest) => createContestInfo(contest));
+    const createdContests: Contest[] = [];
+    await user.contests.map(
+      async (contest) => await createContestInfo(contest)
+    );
+    console.log(createdContests.length);
+    const {
+      handle,
+      name,
+      country,
+      city,
+      organization,
+      rating,
+      maxRating,
+      registrationTimeSeconds,
+      photoLink,
+      contests,
+      solutions,
+    } = user;
 
     await prisma.user.upsert({
-      where: { handle: user.handle },
+      where: { handle },
       create: {
-        handle: user.handle,
-        name: user.name,
-        country: user.country,
-        city: user.city,
-        organization: user.organization,
-        rating: user.rating,
-        maxRating: user.maxRating,
-        registrationTimeSeconds: user.registrationTimeSeconds,
-        photoLink: user.photoLink,
+        handle,
+        name,
+        country,
+        city,
+        organization,
+        rating,
+        maxRating,
+        registrationTimeSeconds,
+        photoLink,
         contests: {
-          connect: user.contests.map((contest) => ({ id: contest.id })),
+          connect: contests.map((contest) => ({ id: contest.id })),
         },
       },
       update: {
-        handle: user.handle,
-        name: user.name,
-        country: user.country,
-        city: user.city,
-        organization: user.organization,
-        rating: user.rating,
-        maxRating: user.maxRating,
-        registrationTimeSeconds: user.registrationTimeSeconds,
-        photoLink: user.photoLink,
+        handle,
+        name,
+        country,
+        city,
+        organization,
+        rating,
+        maxRating,
+        registrationTimeSeconds,
+        photoLink,
         contests: {
-          connect: user.contests.map((contest) => ({ id: contest.id })),
+          connect: contests.map((contest) => ({ id: contest.id })),
         },
         updatedAt: new Date(),
       },
     });
 
-    await prisma.solution.deleteMany({
-      where: { userHandle: user.handle },
+    Object.entries(solutions).map(async ([_, solution]) => {
+      await createProblem(solution.problem);
     });
 
-    Object.entries(user.solutions).map(([_, solution]) => {
-      createProblem(solution.problem);
-    });
-
+    await prisma.solution.deleteMany({ where: { userHandle: handle } });
     await prisma.solution.createMany({
-      data: Object.entries(user.solutions).map(([_, solution]) => ({
-        problemContestId: solution.problem.contestId,
+      data: Object.entries(solutions).map(([_, solution]) => ({
+        problemContestId: solution.problem.contest.id,
         problemIndex: solution.problem.index,
         submissionTimeSeconds: solution.submissionTimeSeconds,
         contestFlag: solution.contestFlag,
-        userHandle: user.handle,
+        userHandle: handle,
       })),
     });
 
-    return await getUser(user.handle);
+    return await getUser(handle);
   } catch (error) {
     console.error(error);
-    throw new Error('Failed to create user in the database.');
+    throw new Error(`Failed to create user in the database: ${user.handle}`);
   }
 };
 

@@ -1,4 +1,5 @@
 import { Box, Heading, Link, Text, VStack } from '@chakra-ui/react';
+import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getProblem } from '../api';
@@ -24,20 +25,29 @@ const ProblemComponent = () => {
 
   if (!problemData) return <div>Loading...</div>;
 
-  const { contestId, index, name, difficulty, tags } = problemData;
+  const { contest, index, name, difficulty, tags } = problemData;
+  const { startTimeSeconds } = contest;
 
   return (
     <VStack spacing={8} align="start">
       <Box>
         <Heading size="lg">
           <Link
-            href={`https://codeforces.com/contest/${contestId}/problem/${index}`}
+            href={`https://codeforces.com/contest/${contest.id}/problem/${index}`}
           >
             {name}
           </Link>
         </Heading>
         <Text fontWeight="bold">Contest ID:</Text>
-        <Link href={`../contest/${contestId}`}>{contestId}</Link>
+        <Link href={`../contest/${contest.id}`}>{contest.id}</Link>
+        {startTimeSeconds && (
+          <>
+            <Text fontWeight="bold">Time:</Text>
+            <Text>
+              {moment(startTimeSeconds * 1000).format('YYYY-MM-DD HH:mm:ss')}
+            </Text>
+          </>
+        )}
         <Text fontWeight="bold">Index:</Text>
         <Text>{index}</Text>
         <Text fontWeight="bold">Difficulty:</Text>
