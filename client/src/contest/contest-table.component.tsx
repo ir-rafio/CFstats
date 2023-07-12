@@ -5,15 +5,14 @@ import {
   Button,
   ButtonGroup,
   Heading,
-  Link,
   Table,
   Tbody,
-  Td,
   Th,
   Thead,
   Tr,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import ContestRow from './contest.row.component';
 
 const ContestTable = () => {
   const [mode, setMode] = useState<
@@ -85,16 +84,7 @@ const ContestTable = () => {
         </Thead>
         <Tbody>
           {contests.map((contest) => (
-            <Tr key={contest.id}>
-              <Td>
-                <Link href={`contest/${contest.id}`}>{contest.name}</Link>
-              </Td>
-              <Td>
-                {contest.startTimeSeconds
-                  ? new Date(contest.startTimeSeconds * 1000).toLocaleString()
-                  : 'N/A'}
-              </Td>
-            </Tr>
+            <ContestRow key={contest.id} contest={contest} />
           ))}
         </Tbody>
       </Table>

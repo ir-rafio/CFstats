@@ -1,7 +1,6 @@
 import {
   Box,
   Divider,
-  Flex,
   Heading,
   Link,
   Stack,
@@ -24,6 +23,7 @@ import {
   Problem,
   UserSolution,
 } from '../api/interfaces';
+import Problemset from '../problem/problemset.component';
 
 const UserComponent = () => {
   const { handle } = useParams();
@@ -45,7 +45,7 @@ const UserComponent = () => {
 
   if (!userData) return <div>Loading...</div>;
 
-  let {
+  const {
     name,
     country,
     city,
@@ -58,12 +58,12 @@ const UserComponent = () => {
     photoLink,
     solveCount,
     contestCount,
-    levels,
-    difficulties,
-    tags,
     solutions,
     contests,
   } = userData;
+
+  const problems: Problem[] = [];
+  solutions.map((solution) => problems.push(solution.problem));
 
   const rankColors = {
     Newbie: { color1: '#808080', color2: 'White' },
@@ -76,69 +76,6 @@ const UserComponent = () => {
     Grandmaster: { color1: '#ff0000', color2: 'White' },
     'International Grandmaster': { color1: '#ff0000', color2: 'White' },
     'Legendary Grandmaster': { color1: '#ff0000', color2: 'Black' },
-  };
-
-  const renderBarGraph = (
-    data: Record<string, number>,
-    emptyMessage: string
-  ) => {
-    const numRecords = Object.keys(data).length;
-    const maxValue = Math.max(...Object.values(data));
-
-    if (numRecords === 0 || maxValue <= 0) {
-      return <Text>{emptyMessage}</Text>;
-    }
-
-    const graphWidth = 500;
-    const graphHeight = 300;
-    const gap = 20;
-    const barWidth = Math.max(graphWidth / numRecords, 100);
-
-    return (
-      <Flex direction="column" alignItems="center">
-        <Box
-          width={graphWidth}
-          height={graphHeight + 4 * gap}
-          overflowX="scroll"
-        >
-          <Flex justifyContent="flex-start" width={barWidth * numRecords}>
-            {Object.entries(data).map(([key, value]) => {
-              const barHeight = graphHeight * (value / maxValue);
-              const bottomY = graphHeight + gap;
-              const topY = bottomY - barHeight;
-              const valueY = topY - gap;
-              const keyY = bottomY + gap;
-
-              return (
-                <Flex
-                  key={key}
-                  direction="column"
-                  alignItems="center"
-                  width={barWidth}
-                  height={graphHeight}
-                  position="relative"
-                >
-                  <Box
-                    bg="blue.500"
-                    height={barHeight}
-                    width="100%"
-                    position="absolute"
-                    top={topY + 'px'}
-                    border="1px solid black"
-                  />
-                  <Text fontSize="sm" position="absolute" top={valueY + 'px'}>
-                    {value}
-                  </Text>
-                  <Text fontSize="sm" position="absolute" top={keyY + 'px'}>
-                    {key}
-                  </Text>
-                </Flex>
-              );
-            })}
-          </Flex>
-        </Box>
-      </Flex>
-    );
   };
 
   const renderContestTable = (contests: ContestInfo[]) => {
@@ -275,20 +212,7 @@ const UserComponent = () => {
 
       <Divider />
 
-      <Flex>
-        <Box width="30%">
-          <Heading size="md">Levels</Heading>
-          {renderBarGraph(levels, 'Empty')}
-        </Box>
-        <Box width="30%" ml="5%">
-          <Heading size="md">Difficulties</Heading>
-          {renderBarGraph(difficulties, 'Empty')}
-        </Box>
-        <Box width="30%" ml="5%">
-          <Heading size="md">Tags</Heading>
-          {renderBarGraph(tags, 'Empty')}
-        </Box>
-      </Flex>
+      <Problemset problems={problems} />
     </VStack>
   );
 };
