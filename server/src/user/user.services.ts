@@ -1,4 +1,4 @@
-import { Contest, User, UserSolution } from '../api/codeforces/interfaces';
+import { ContestInfo, User, UserSolution } from '../api/codeforces/interfaces';
 import { createContestInfo } from '../contest/contest.services';
 import prisma from '../prisma';
 import { createProblem, fetchProblem } from '../problem/problem.services';
@@ -6,7 +6,7 @@ import { checkRecent } from '../utils';
 
 export const createUser = async (user: User): Promise<User | null> => {
   try {
-    const createdContests: Contest[] = [];
+    const createdContests: ContestInfo[] = [];
     await user.contests.map(
       async (contest) => await createContestInfo(contest)
     );
@@ -92,7 +92,7 @@ export const getUser = async (handle: string): Promise<User | null> => {
   if (!dbUser) return null;
   if (!checkRecent(dbUser.updatedAt, 7200)) return null;
 
-  const mappedContests: Contest[] = dbUser.contests.map((contest) => {
+  const mappedContests: ContestInfo[] = dbUser.contests.map((contest) => {
     const { id, name, type, phase } = contest;
     const startTimeSeconds = contest.startTimeSeconds ?? undefined;
     return { id, name, startTimeSeconds: startTimeSeconds, type, phase };

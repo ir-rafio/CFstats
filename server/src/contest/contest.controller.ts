@@ -10,7 +10,7 @@ import {
   getContestInfo as getContestInfoFromApi,
   getContestList as getContestListFromApi,
 } from '../api/codeforces';
-import { Contest, ContestDetails } from '../api/codeforces/interfaces';
+import { ContestDetails, ContestInfo } from '../api/codeforces/interfaces';
 
 const parseContest = (contest: ContestDetails): ContestDetails => {
   const { problems } = contest;
@@ -22,13 +22,7 @@ const parseContest = (contest: ContestDetails): ContestDetails => {
 export const getContest = async (id: number): Promise<ContestDetails> => {
   try {
     const existingContest = await getContestFromDb(id);
-    if (
-      existingContest &&
-      (existingContest.info.phase !== 'FINISHED' ||
-        (existingContest.problems.length > 0 &&
-          existingContest.rank.length > 0))
-    )
-      return parseContest(existingContest);
+    if (existingContest) return parseContest(existingContest);
 
     const contestInfo = await getContestInfoFromApi(id);
     if (contestInfo.phase !== 'FINISHED')
@@ -53,7 +47,7 @@ export const getContest = async (id: number): Promise<ContestDetails> => {
   }
 };
 
-export const getContestList = async (): Promise<Contest[]> => {
+export const getContestList = async (): Promise<ContestInfo[]> => {
   try {
     const existingContestList = await getContestMany({});
     if (existingContestList) return existingContestList;
@@ -61,7 +55,7 @@ export const getContestList = async (): Promise<Contest[]> => {
     const contestList = await getContestListFromApi();
     let flag: boolean = true;
 
-    const createdContestList: Contest[] = [];
+    const createdContestList: ContestInfo[] = [];
     for (const contest of contestList) {
       const createdContest = await createContestInfo(contest);
       if (createdContest) createdContestList.push(createdContest);
@@ -80,12 +74,12 @@ export const getContestList = async (): Promise<Contest[]> => {
 
 export const getFilteredContests = async (
   prismaFilter: object
-): Promise<Contest[]> => {
+): Promise<ContestInfo[]> => {
   const existingContests = await getContestMany(prismaFilter);
   if (existingContests) return existingContests;
 
   const contestList = await getContestListFromApi();
-  const createdContestList: Contest[] = [];
+  const createdContestList: ContestInfo[] = [];
   for (const contest of contestList) {
     const createdContest = await createContestInfo(contest);
     if (createdContest) createdContestList.push(createdContest);

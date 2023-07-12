@@ -18,17 +18,16 @@ import {
 } from './service/interfaces';
 
 import {
-  Contest,
   ContestDetails,
+  ContestInfo,
   ContestRank,
-  // Problem,
   User,
   UserSolution,
 } from './interfaces';
 
 import { Problem } from './interfaces/problem.interfaces';
 
-const parseContest = (contest: CfContest): Contest => {
+const parseContestInfo = (contest: CfContest): ContestInfo => {
   const { id, name, type, phase, startTimeSeconds } = contest;
   return { id, name, type, phase, startTimeSeconds: startTimeSeconds };
 };
@@ -68,7 +67,7 @@ export const getContest = async (
     );
 
     return {
-      info: parseContest(cfContest),
+      info: parseContestInfo(cfContest),
       rank: parseContestRank(rankingRows),
       problems,
     };
@@ -78,11 +77,12 @@ export const getContest = async (
   }
 };
 
-export const getContestList = async (): Promise<Contest[]> => {
+export const getContestList = async (): Promise<ContestInfo[]> => {
   try {
     const cfContests: CfContest[] = await getCfContestList();
-    let contests: Contest[] = [];
-    for (const cfContest of cfContests) contests.push(parseContest(cfContest));
+    let contests: ContestInfo[] = [];
+    for (const cfContest of cfContests)
+      contests.push(parseContestInfo(cfContest));
     return contests;
   } catch (error) {
     console.error('An error occurred:', error);
@@ -90,7 +90,9 @@ export const getContestList = async (): Promise<Contest[]> => {
   }
 };
 
-export const getContestInfo = async (contestId: number): Promise<Contest> => {
+export const getContestInfo = async (
+  contestId: number
+): Promise<ContestInfo> => {
   try {
     const cfContests: CfContest[] = await getCfContestList();
     for (const cfContest of cfContests)
@@ -103,7 +105,7 @@ export const getContestInfo = async (contestId: number): Promise<Contest> => {
 };
 
 class ContestFacade {
-  private dict: { [id: number]: Contest };
+  private dict: { [id: number]: ContestInfo };
 
   constructor() {
     this.dict = {};
@@ -114,22 +116,22 @@ class ContestFacade {
     for (const contest of contestList) this.dict[contest.id] = contest;
   }
 
-  get(id: number): Contest | null {
+  get(id: number): ContestInfo | null {
     return this.dict[id] || null;
   }
 
-  getAll(): Contest[] {
+  getAll(): ContestInfo[] {
     return Object.values(this.dict);
   }
 
-  getSome(ids: number[]): Contest[] {
+  getSome(ids: number[]): ContestInfo[] {
     return ids.map((id) => this.dict[id]);
   }
 }
 
 const contestFacade = new ContestFacade();
 
-const parseProblem = (problem: CfProblem, contest: Contest): Problem => {
+const parseProblem = (problem: CfProblem, contest: ContestInfo): Problem => {
   if (!problem.contestId)
     throw new Error('Invalid problem: contest id is missing!');
 
@@ -148,7 +150,7 @@ export const getProblem = async (
     );
     const cfContestProblems: CfProblem[] = cfContestStandings['problems'];
     const cfContest: CfContest = cfContestStandings['contest'];
-    const contest: Contest = parseContest(cfContest);
+    const contest: ContestInfo = parseContestInfo(cfContest);
 
     for (const problem of cfContestProblems)
       if (problem.index === index) return parseProblem(problem, contest);
@@ -205,7 +207,7 @@ const parseName = (
 
 const getUserRecords = async (
   handle: string
-): Promise<{ solutions: UserSolution[]; contests: Contest[] }> => {
+): Promise<{ solutions: UserSolution[]; contests: ContestInfo[] }> => {
   try {
     const submissions: CfSubmission[] = await getCfUserSubmissions(handle);
     submissions.sort((a, b) => b.creationTimeSeconds - a.creationTimeSeconds);

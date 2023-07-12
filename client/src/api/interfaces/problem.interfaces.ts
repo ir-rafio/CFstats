@@ -1,8 +1,8 @@
-import { Contest } from './contest.interfaces';
+import { ContestInfo } from './contest.interfaces';
 
 export class Problem {
   constructor(
-    public contest: Contest,
+    public contest: ContestInfo,
     public index: string,
     public name: string,
     public tags: string[],

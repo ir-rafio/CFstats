@@ -2,8 +2,8 @@ import prisma from '../prisma';
 import { checkRecent } from '../utils';
 
 import {
-  Contest,
   ContestDetails,
+  ContestInfo,
   ContestRank,
 } from '../api/codeforces/interfaces';
 
@@ -24,6 +24,7 @@ export const createContest = async (
         type: info.type,
         phase: info.phase,
         startTimeSeconds: info.startTimeSeconds,
+        hasDetails: true,
       },
       update: {
         id: info.id,
@@ -31,6 +32,7 @@ export const createContest = async (
         type: info.type,
         phase: info.phase,
         startTimeSeconds: info.startTimeSeconds,
+        hasDetails: true,
         updatedAt: new Date(),
       },
     });
@@ -56,8 +58,8 @@ export const createContest = async (
 };
 
 export const createContestInfo = async (
-  contest: Contest
-): Promise<Contest | null> => {
+  contest: ContestInfo
+): Promise<ContestInfo | null> => {
   try {
     const dbContest = await prisma.contest.upsert({
       where: { id: contest.id },
@@ -67,6 +69,7 @@ export const createContestInfo = async (
         type: contest.type,
         phase: contest.phase,
         startTimeSeconds: contest.startTimeSeconds,
+        hasDetails: false,
       },
       update: {
         id: contest.id,
@@ -74,6 +77,7 @@ export const createContestInfo = async (
         type: contest.type,
         phase: contest.phase,
         startTimeSeconds: contest.startTimeSeconds,
+        hasDetails: false,
         updatedAt: new Date(),
       },
     });
@@ -95,9 +99,10 @@ export const getContest = async (
 
   if (!dbContest) return null;
   if (!checkRecent(dbContest.updatedAt, 7200)) return null;
+  if (!dbContest.hasDetails) return null;
 
   const { name, type, phase, startTimeSeconds, ranks, problems } = dbContest;
-  const contest: Contest = {
+  const contest: ContestInfo = {
     id,
     name,
     type,
@@ -124,7 +129,7 @@ export const getContest = async (
 
 export const getContestMany = async (
   prismaFilter: object
-): Promise<Contest[] | null> => {
+): Promise<ContestInfo[] | null> => {
   const dbContests = await prisma.contest.findMany({ where: prismaFilter });
   if (!dbContests) return null;
 
@@ -136,7 +141,7 @@ export const getContestMany = async (
   if (!updatedAt) return null;
   if (!checkRecent(updatedAt, 7200)) return null;
 
-  const contests: Contest[] = dbContests.map((dbContest) => {
+  const contests: ContestInfo[] = dbContests.map((dbContest) => {
     const { id, name, type, phase, startTimeSeconds } = dbContest;
     return {
       id,

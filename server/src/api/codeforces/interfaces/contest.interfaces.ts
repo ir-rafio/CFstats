@@ -5,7 +5,7 @@ export interface ContestRank {
   position: number;
 }
 
-export interface Contest {
+export interface ContestInfo {
   id: number;
   name: string;
   type: 'CF' | 'IOI' | 'ICPC';
@@ -19,7 +19,7 @@ export interface Contest {
 }
 
 export interface ContestDetails {
-  info: Contest;
+  info: ContestInfo;
   problems: Problem[];
   rank: ContestRank[];
 }

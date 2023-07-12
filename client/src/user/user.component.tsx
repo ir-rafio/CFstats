@@ -18,7 +18,12 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getUser } from '../api';
-import { Contest, ParsedUser, Problem, UserSolution } from '../api/interfaces';
+import {
+  ContestInfo,
+  ParsedUser,
+  Problem,
+  UserSolution,
+} from '../api/interfaces';
 
 const UserComponent = () => {
   const { handle } = useParams();
@@ -136,7 +141,7 @@ const UserComponent = () => {
     );
   };
 
-  const renderContestTable = (contests: Contest[]) => {
+  const renderContestTable = (contests: ContestInfo[]) => {
     return (
       <Box maxH="400px" overflowY="scroll" width="100%">
         <Table>

@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { Contest, ContestDetails, ParsedUser, Problem } from './interfaces';
+import { ContestDetails, ContestInfo, ParsedUser, Problem } from './interfaces';
 
 const url = 'http://localhost:4000';
 
@@ -45,7 +45,9 @@ export const getProblemList = async (): Promise<AxiosResponse<Problem[]>> => {
   }
 };
 
-export const getContestList = async (): Promise<AxiosResponse<Contest[]>> => {
+export const getContestList = async (): Promise<
+  AxiosResponse<ContestInfo[]>
+> => {
   try {
     return await axios.get(`${url}/contest/many`);
   } catch (error) {
@@ -56,12 +58,12 @@ export const getContestList = async (): Promise<AxiosResponse<Contest[]>> => {
 
 export const getUpcomingContests = async (
   mode: 'ONGOING' | 'UPCOMING' | 'TODAY' | 'THIS WEEK'
-): Promise<Contest[]> => {
+): Promise<ContestInfo[]> => {
   try {
-    const response: AxiosResponse<Contest[]> = await axios.get(
+    const response: AxiosResponse<ContestInfo[]> = await axios.get(
       `${url}/contest/upcoming`
     );
-    const contests: Contest[] = response.data;
+    const contests: ContestInfo[] = response.data;
     const currentTime = new Date();
 
     if (mode === 'ONGOING') {

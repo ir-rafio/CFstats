@@ -41,6 +41,7 @@ model Contest {
   type             ContestType
   phase            ContestPhase
   updatedAt        DateTime      @updatedAt
+  hasDetails       Boolean
   ranks            ContestRank[]
   users            User[]
   problems         Problem[]

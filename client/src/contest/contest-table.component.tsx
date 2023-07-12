@@ -1,5 +1,5 @@
 import { getUpcomingContests } from '../api';
-import { Contest } from '../api/interfaces';
+import { ContestInfo } from '../api/interfaces';
 
 import {
   Button,
@@ -20,7 +20,7 @@ const ContestTable = () => {
     'ONGOING' | 'UPCOMING' | 'TODAY' | 'THIS WEEK'
   >('ONGOING');
   const [loading, setLoading] = useState(true);
-  const [contests, setContests] = useState<Contest[]>([]);
+  const [contests, setContests] = useState<ContestInfo[]>([]);
 
   useEffect(() => {
     const fetchContests = async () => {
