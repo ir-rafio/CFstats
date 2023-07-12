@@ -90,7 +90,7 @@ export const getUser = async (handle: string): Promise<User | null> => {
   });
 
   if (!dbUser) return null;
-  if (!checkRecent(dbUser.updatedAt, 7200)) null;
+  if (!checkRecent(dbUser.updatedAt, 7200)) return null;
 
   const mappedContests: Contest[] = dbUser.contests.map((contest) => {
     const { id, name, type, phase } = contest;

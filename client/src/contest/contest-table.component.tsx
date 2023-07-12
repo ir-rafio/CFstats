@@ -16,9 +16,9 @@ import {
 import { useEffect, useState } from 'react';
 
 const ContestTable = () => {
-  const [mode, setMode] = useState<'ONGOING' | 'TODAY' | 'THIS WEEK'>(
-    'ONGOING'
-  );
+  const [mode, setMode] = useState<
+    'ONGOING' | 'UPCOMING' | 'TODAY' | 'THIS WEEK'
+  >('ONGOING');
   const [loading, setLoading] = useState(true);
   const [contests, setContests] = useState<Contest[]>([]);
 
@@ -39,7 +39,7 @@ const ContestTable = () => {
   }, [mode]);
 
   const handleModeChange = (
-    selectedMode: 'ONGOING' | 'TODAY' | 'THIS WEEK'
+    selectedMode: 'ONGOING' | 'UPCOMING' | 'TODAY' | 'THIS WEEK'
   ) => {
     setMode(selectedMode);
   };
@@ -55,6 +55,12 @@ const ContestTable = () => {
           onClick={() => handleModeChange('ONGOING')}
         >
           Ongoing
+        </Button>
+        <Button
+          colorScheme={mode === 'UPCOMING' ? 'teal' : 'gray'}
+          onClick={() => handleModeChange('UPCOMING')}
+        >
+          Upcoming
         </Button>
         <Button
           colorScheme={mode === 'TODAY' ? 'teal' : 'gray'}

@@ -55,7 +55,7 @@ export const getContestList = async (): Promise<AxiosResponse<Contest[]>> => {
 };
 
 export const getUpcomingContests = async (
-  mode: 'ONGOING' | 'TODAY' | 'THIS WEEK'
+  mode: 'ONGOING' | 'UPCOMING' | 'TODAY' | 'THIS WEEK'
 ): Promise<Contest[]> => {
   try {
     const response: AxiosResponse<Contest[]> = await axios.get(
@@ -66,6 +66,8 @@ export const getUpcomingContests = async (
 
     if (mode === 'ONGOING') {
       return contests.filter((contest) => contest.phase === 'CODING');
+    } else if (mode === 'UPCOMING') {
+      return contests.filter((contest) => contest.phase === 'BEFORE');
     } else if (mode === 'TODAY') {
       const startOfDay = new Date(
         currentTime.getFullYear(),
