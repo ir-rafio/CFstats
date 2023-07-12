@@ -22,16 +22,16 @@ export interface User {
 }
 
 enum CodeforcesRank {
-  Newbie = 'Newbie',
-  Pupil = 'Pupil',
-  Specialist = 'Specialist',
-  Expert = 'Expert',
-  CandidateMaster = 'Candidate Master',
-  Master = 'Master',
-  InternationalMaster = 'International Master',
-  Grandmaster = 'Grandmaster',
-  InternationalGrandmaster = 'International Grandmaster',
-  LegendaryGrandmaster = 'Legendary Grandmaster',
+  NEWBIE = 'Newbie',
+  PUPIL = 'Pupil',
+  SPECIALIST = 'Specialist',
+  EXPERT = 'Expert',
+  CANDIDATE_MASTER = 'Candidate Master',
+  MASTER = 'Master',
+  INTERNATIONAL_MASTER = 'International Master',
+  GRANDMASTER = 'Grandmaster',
+  INTERNATIONAL_GRANDMASTER = 'International Grandmaster',
+  LEGENDARY_GRANDMASTER = 'Legendary Grandmaster',
 }
 
 export interface ParsedUser extends User {

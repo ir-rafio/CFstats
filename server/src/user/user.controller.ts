@@ -3,16 +3,16 @@ import { User } from '../api/codeforces/interfaces';
 import { createUser, getUser as getUserFromDb } from './user.services';
 
 enum CodeforcesRank {
-  Newbie = 'Newbie',
-  Pupil = 'Pupil',
-  Specialist = 'Specialist',
-  Expert = 'Expert',
-  CandidateMaster = 'Candidate Master',
-  Master = 'Master',
-  InternationalMaster = 'International Master',
-  Grandmaster = 'Grandmaster',
-  InternationalGrandmaster = 'International Grandmaster',
-  LegendaryGrandmaster = 'Legendary Grandmaster',
+  NEWBIE = 'Newbie',
+  PUPIL = 'Pupil',
+  SPECIALIST = 'Specialist',
+  EXPERT = 'Expert',
+  CANDIDATE_MASTER = 'Candidate Master',
+  MASTER = 'Master',
+  INTERNATIONAL_MASTER = 'International Master',
+  GRANDMASTER = 'Grandmaster',
+  INTERNATIONAL_GRANDMASTER = 'International Grandmaster',
+  LEGENDARY_GRANDMASTER = 'Legendary Grandmaster',
 }
 
 export interface ParsedUser extends User {
@@ -27,19 +27,19 @@ export interface ParsedUser extends User {
 
 const calculateRank = (rating: number): CodeforcesRank => {
   const rankMap: [number, CodeforcesRank][] = [
-    [1200, CodeforcesRank.Newbie],
-    [1400, CodeforcesRank.Pupil],
-    [1600, CodeforcesRank.Specialist],
-    [1900, CodeforcesRank.Expert],
-    [2100, CodeforcesRank.CandidateMaster],
-    [2300, CodeforcesRank.Master],
-    [2400, CodeforcesRank.InternationalMaster],
-    [2600, CodeforcesRank.Grandmaster],
-    [3000, CodeforcesRank.InternationalGrandmaster],
+    [1200, CodeforcesRank.NEWBIE],
+    [1400, CodeforcesRank.PUPIL],
+    [1600, CodeforcesRank.SPECIALIST],
+    [1900, CodeforcesRank.EXPERT],
+    [2100, CodeforcesRank.CANDIDATE_MASTER],
+    [2300, CodeforcesRank.MASTER],
+    [2400, CodeforcesRank.INTERNATIONAL_MASTER],
+    [2600, CodeforcesRank.GRANDMASTER],
+    [3000, CodeforcesRank.INTERNATIONAL_GRANDMASTER],
   ];
 
   for (const [threshold, rank] of rankMap) if (rating < threshold) return rank;
-  return CodeforcesRank.LegendaryGrandmaster;
+  return CodeforcesRank.LEGENDARY_GRANDMASTER;
 };
 
 const parseUser = async (user: User): Promise<ParsedUser> => {
