@@ -1,19 +1,10 @@
 import express, { Request, Response } from 'express';
+import { ProblemQuery } from '../interfaces';
 import { getFilteredProblems, getProblem } from './problem.controller';
 
 const router = express.Router();
-interface QueryParams {
-  levelFrom?: string;
-  levelTo?: string;
-  difficultyFrom?: number;
-  difficultyTo?: number;
-  timeSecondsFrom?: number;
-  timeSecondsTo?: number;
-  tags?: string[];
-  shouldCombineTagsByOr?: boolean;
-}
 
-const parseQuery = (query: any): QueryParams => {
+const parseQuery = (query: any): ProblemQuery => {
   const { levelFrom, levelTo, tags, shouldCombineTagsByOr } = query;
 
   const difficultyFrom = query.difficultyFrom
@@ -41,7 +32,7 @@ const parseQuery = (query: any): QueryParams => {
   };
 };
 
-const createPrismaFilter = (query: QueryParams): object => {
+const createPrismaFilter = (query: ProblemQuery): object => {
   const prismaFilter: any = {};
 
   const {
@@ -96,8 +87,8 @@ const createPrismaFilter = (query: QueryParams): object => {
 router.get('/many', async (req: Request, res: Response) => {
   try {
     // TODO: Check query types from front-end.
-    const queryParams: QueryParams = parseQuery(req.query);
-    // const queryParams: QueryParams = req.query;
+    const queryParams: ProblemQuery = parseQuery(req.query);
+    // const queryParams: ProblemQuery = req.query;
     const prismaFilter = createPrismaFilter(queryParams);
     const problemList = await getFilteredProblems(prismaFilter);
     res.status(200).json(problemList);

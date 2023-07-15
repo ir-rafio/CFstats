@@ -1,5 +1,6 @@
 import { ContestDetails, ContestInfo, ContestRank } from './contest.interfaces';
 import { Problem, Problemset } from './problem.interfaces';
+import { ProblemQuery } from './query.interfaces';
 import {
   CodeforcesRank,
   ParsedUser,
@@ -13,6 +14,7 @@ export type {
   ContestInfo,
   ContestRank,
   ParsedUser,
+  ProblemQuery,
   User,
   UserSolution,
 };

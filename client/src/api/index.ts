@@ -4,6 +4,8 @@ import {
   ContestInfo,
   ParsedUser,
   Problem,
+  ProblemQuery,
+  Problemset,
 } from '../interfaces';
 
 const url = 'http://localhost:4000';
@@ -30,6 +32,17 @@ export const getProblem = async (
   }
 };
 
+export const getProblemset = async (
+  query: ProblemQuery
+): Promise<AxiosResponse<Problemset>> => {
+  try {
+    return await axios.get(`${url}/problem/many`, { params: query });
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to fetch problem list from the server.');
+  }
+};
+
 export const getContest = async (
   id: number
 ): Promise<AxiosResponse<ContestDetails>> => {
@@ -38,15 +51,6 @@ export const getContest = async (
   } catch (error) {
     console.error(error);
     throw new Error('Failed to fetch contest data from the server.');
-  }
-};
-
-export const getProblemset = async (): Promise<AxiosResponse<Problem[]>> => {
-  try {
-    return await axios.get(`${url}/problem/many`);
-  } catch (error) {
-    console.error(error);
-    throw new Error('Failed to fetch problem list from the server.');
   }
 };
 
