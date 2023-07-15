@@ -10,6 +10,7 @@ export const createUser = async (user: User): Promise<User | null> => {
     await user.contests.map(
       async (contest) => await createContestInfo(contest)
     );
+    // TODO: Figure out why this is 0 despite using await twice.
     console.log(createdContests.length);
 
     const {

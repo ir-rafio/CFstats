@@ -55,7 +55,7 @@ const createPrismaFilter = (query: QueryParams): object => {
     shouldCombineTagsByOr,
   } = query;
 
-  // TODO: Find a way to use level
+  // TODO: Find a way to use level.
   if (levelFrom || levelTo) {
     prismaFilter.index = {};
 
@@ -95,7 +95,7 @@ const createPrismaFilter = (query: QueryParams): object => {
 
 router.get('/many', async (req: Request, res: Response) => {
   try {
-    // TODO: Check query types from front-end
+    // TODO: Check query types from front-end.
     const queryParams: QueryParams = parseQuery(req.query);
     // const queryParams: QueryParams = req.query;
     const prismaFilter = createPrismaFilter(queryParams);

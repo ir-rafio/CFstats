@@ -120,6 +120,7 @@ const UserComponent = () => {
           <Tbody>
             {solutions.map((solution) => {
               const problem = solution.problem;
+              // TODO: Figure out why problem.getKey() doesn't work.
               // const problemKey = problem.getKey();
               const problemKey = Problem.generateKey(
                 problem.contest.id,

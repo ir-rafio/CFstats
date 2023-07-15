@@ -8,7 +8,7 @@ interface ProblemsetProps {
 }
 
 const ProblemsetComponent: React.FC<ProblemsetProps> = ({ problemset }) => {
-  // FIXME: Figure out why problemset.getStats() doesn't work.
+  // TODO: Figure out why problemset.getStats() doesn't work.
   const { levels, difficulties, tags } = getStats(problemset);
 
   return (

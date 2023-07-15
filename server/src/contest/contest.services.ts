@@ -100,7 +100,7 @@ export const getContestDetails = async (
   });
 
   if (!dbContest) return null;
-  // FIXME: Why is this false for newly created contests?
+  // TODO: Figure out why this is false for newly created contests.
   console.log(dbContest.hasDetails);
   if (!dbContest.hasDetails) return null;
 
