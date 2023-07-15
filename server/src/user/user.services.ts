@@ -1,5 +1,5 @@
-import { ContestInfo, User, UserSolution } from '../api/codeforces/interfaces';
 import { createContestInfo } from '../contest/contest.services';
+import { ContestInfo, User, UserSolution } from '../interfaces';
 import prisma from '../prisma';
 import { createProblem, getProblem } from '../problem/problem.services';
 import { checkRecent } from '../utils';

@@ -10,7 +10,7 @@ import {
   getContest as getContestFromApi,
   getContestList as getContestListFromApi,
 } from '../api/codeforces';
-import { ContestDetails, ContestInfo } from '../api/codeforces/interfaces';
+import { ContestDetails, ContestInfo } from '../interfaces';
 
 const parseContest = (contest: ContestDetails): ContestDetails => {
   const { problems } = contest;

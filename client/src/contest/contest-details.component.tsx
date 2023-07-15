@@ -16,7 +16,7 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getContest } from '../api';
-import { ContestDetails, ContestRank, Problem } from '../api/interfaces';
+import { ContestDetails, ContestRank, Problem } from '../interfaces';
 
 const ContestComponent = () => {
   const id = Number(useParams().id);

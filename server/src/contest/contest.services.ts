@@ -1,13 +1,9 @@
 import prisma from '../prisma';
 import { checkRecent } from '../utils';
 
-import {
-  ContestDetails,
-  ContestInfo,
-  ContestRank,
-} from '../api/codeforces/interfaces';
+import { ContestDetails, ContestInfo, ContestRank } from '../interfaces';
 
-import { Problem } from '../api/codeforces/interfaces';
+import { Problem } from '../interfaces';
 import { createProblem } from '../problem/problem.services';
 
 export const createContestDetails = async (

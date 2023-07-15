@@ -3,7 +3,7 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getProblem } from '../api';
-import { Problem } from '../api/interfaces';
+import { Problem } from '../interfaces';
 
 const ProblemComponent = () => {
   const { key } = useParams();

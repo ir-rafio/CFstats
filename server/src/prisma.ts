@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { Problem } from './api/codeforces/interfaces';
+import { Problem } from './interfaces';
 
 export const prisma = new PrismaClient().$extends({
   result: {

@@ -1,5 +1,5 @@
-import { Problem } from '../api/codeforces/interfaces';
 import { createContestInfo } from '../contest/contest.services';
+import { Problem } from '../interfaces';
 import prisma from '../prisma';
 import { checkRecent } from '../utils';
 

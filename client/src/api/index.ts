@@ -1,5 +1,10 @@
 import axios, { AxiosResponse } from 'axios';
-import { ContestDetails, ContestInfo, ParsedUser, Problem } from './interfaces';
+import {
+  ContestDetails,
+  ContestInfo,
+  ParsedUser,
+  Problem,
+} from '../interfaces';
 
 const url = 'http://localhost:4000';
 

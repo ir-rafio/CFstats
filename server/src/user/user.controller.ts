@@ -5,7 +5,7 @@ import {
   Problem,
   Problemset,
   User,
-} from '../api/codeforces/interfaces';
+} from '../interfaces';
 import {
   createUser,
   getRecentUser as getRecentUserFromDb,

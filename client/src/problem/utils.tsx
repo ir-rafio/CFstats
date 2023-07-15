@@ -1,5 +1,5 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { Problemset } from '../api/interfaces';
+import { Problemset } from '../interfaces';
 
 export const renderBarGraph = (
   data: Record<string, number>,

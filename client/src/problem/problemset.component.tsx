@@ -1,4 +1,4 @@
-import { Problemset } from '../api/interfaces';
+import { Problemset } from '../interfaces';
 
 import { Box, Flex, Heading } from '@chakra-ui/react';
 import { getStats, renderBarGraph } from './utils';

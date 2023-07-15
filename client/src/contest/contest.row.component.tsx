@@ -1,4 +1,4 @@
-import { ContestInfo } from '../api/interfaces';
+import { ContestInfo } from '../interfaces';
 
 import { Link } from '@chakra-ui/react';
 

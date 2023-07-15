@@ -1,5 +1,5 @@
 import { getUpcomingContests } from '../api';
-import { ContestInfo } from '../api/interfaces';
+import { ContestInfo } from '../interfaces';
 
 import {
   Button,

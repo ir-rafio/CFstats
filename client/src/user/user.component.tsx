@@ -17,12 +17,7 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getUser } from '../api';
-import {
-  ContestInfo,
-  ParsedUser,
-  Problem,
-  UserSolution,
-} from '../api/interfaces';
+import { ContestInfo, ParsedUser, Problem, UserSolution } from '../interfaces';
 import ProblemsetComponent from '../problem/problemset.component';
 
 const UserComponent = () => {

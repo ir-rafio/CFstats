@@ -2,7 +2,7 @@ import {
   getProblem as getProblemFromApi,
   getProblemList as getProblemListFromApi,
 } from '../api/codeforces';
-import { Problem, Problemset } from '../api/codeforces/interfaces';
+import { Problem, Problemset } from '../interfaces';
 import {
   createProblem,
   getProblemMany,
