@@ -1,4 +1,4 @@
-import { Problem } from '../api/codeforces/interfaces/problem.interfaces';
+import { Problem } from '../api/codeforces/interfaces';
 import { createContestInfo } from '../contest/contest.services';
 import prisma from '../prisma';
 import { checkRecent } from '../utils';
@@ -10,7 +10,7 @@ export const createProblem = async (
     await createContestInfo(problem.contest);
     const { contest, index, name, difficulty, tags } = problem;
 
-    const dbProblem = await prisma.problem.upsert({
+    await prisma.problem.upsert({
       where: {
         contestId_index: {
           contestId: contest.id,
@@ -38,7 +38,7 @@ export const createProblem = async (
       },
     });
 
-    return dbProblem ? problem : null;
+    return getProblem(contest.id, index);
   } catch (error) {
     console.error(error);
     throw new Error(
@@ -47,7 +47,7 @@ export const createProblem = async (
   }
 };
 
-export const fetchProblem = async (
+export const getProblem = async (
   contestId: number,
   index: string
 ): Promise<Problem | null> => {
@@ -78,7 +78,7 @@ export const fetchProblem = async (
   return new Problem(contest, index, name, tags, difficulty ?? undefined);
 };
 
-export const getProblem = async (
+export const getRecentProblem = async (
   contestId: number,
   index: string
 ): Promise<Problem | null> => {
@@ -111,6 +111,32 @@ export const getProblem = async (
 };
 
 export const getProblemMany = async (
+  prismaFilter: object
+): Promise<Problem[] | null> => {
+  const dbProblems = await prisma.problem.findMany({
+    where: prismaFilter,
+    include: { contest: true },
+  });
+  if (!dbProblems) return null;
+
+  const problems: Problem[] = dbProblems.map((dbProblem) => {
+    const { contestId, index, name, difficulty, tags } = dbProblem;
+    const { phase, startTimeSeconds, type } = dbProblem.contest;
+    const contestName = dbProblem.contest.name;
+    const contest = {
+      id: contestId,
+      name: contestName,
+      phase,
+      startTimeSeconds: startTimeSeconds ?? undefined,
+      type,
+    };
+    return new Problem(contest, index, name, tags, difficulty ?? undefined);
+  });
+
+  return problems;
+};
+
+export const getRecentProblemMany = async (
   prismaFilter: object
 ): Promise<Problem[] | null> => {
   const dbProblems = await prisma.problem.findMany({

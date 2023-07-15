@@ -1,8 +1,13 @@
 import { ContestDetails, ContestInfo, ContestRank } from './contest.interfaces';
-import { Problem } from './problem.interfaces';
-import { ParsedUser, User, UserSolution } from './user.interfaces';
+import { Problem, Problemset } from './problem.interfaces';
+import {
+  CodeforcesRank,
+  ParsedUser,
+  User,
+  UserSolution,
+} from './user.interfaces';
 
-export { Problem };
+export { CodeforcesRank, Problem, Problemset };
 export type {
   ContestDetails,
   ContestInfo,

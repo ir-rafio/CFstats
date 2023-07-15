@@ -1,5 +1,5 @@
 import { ContestInfo } from './contest.interfaces';
-import { Problem } from './problem.interfaces';
+import { Problem, Problemset } from './problem.interfaces';
 
 export interface UserSolution {
   problem: Problem;
@@ -19,4 +19,25 @@ export interface User {
   photoLink: string;
   solutions: UserSolution[];
   contests: ContestInfo[];
+}
+
+export enum CodeforcesRank {
+  NEWBIE = 'Newbie',
+  PUPIL = 'Pupil',
+  SPECIALIST = 'Specialist',
+  EXPERT = 'Expert',
+  CANDIDATE_MASTER = 'Candidate Master',
+  MASTER = 'Master',
+  INTERNATIONAL_MASTER = 'International Master',
+  GRANDMASTER = 'Grandmaster',
+  INTERNATIONAL_GRANDMASTER = 'International Grandmaster',
+  LEGENDARY_GRANDMASTER = 'Legendary Grandmaster',
+}
+
+export interface ParsedUser extends User {
+  rank: CodeforcesRank;
+  maxRank: CodeforcesRank;
+  solveCount: number;
+  contestCount: number;
+  problemset: Problemset;
 }

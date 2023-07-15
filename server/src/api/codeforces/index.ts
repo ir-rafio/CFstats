@@ -21,11 +21,10 @@ import {
   ContestDetails,
   ContestInfo,
   ContestRank,
+  Problem,
   User,
   UserSolution,
 } from './interfaces';
-
-import { Problem } from './interfaces/problem.interfaces';
 
 const parseContestInfo = (contest: CfContest): ContestInfo => {
   const { id, name, type, phase, startTimeSeconds } = contest;

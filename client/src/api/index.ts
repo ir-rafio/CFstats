@@ -36,7 +36,7 @@ export const getContest = async (
   }
 };
 
-export const getProblemList = async (): Promise<AxiosResponse<Problem[]>> => {
+export const getProblemset = async (): Promise<AxiosResponse<Problem[]>> => {
   try {
     return await axios.get(`${url}/problem/many`);
   } catch (error) {

@@ -1,29 +1,15 @@
 import { getUser as getUserFromApi } from '../api/codeforces';
-import { User } from '../api/codeforces/interfaces';
-import { createUser, getUser as getUserFromDb } from './user.services';
-
-enum CodeforcesRank {
-  NEWBIE = 'Newbie',
-  PUPIL = 'Pupil',
-  SPECIALIST = 'Specialist',
-  EXPERT = 'Expert',
-  CANDIDATE_MASTER = 'Candidate Master',
-  MASTER = 'Master',
-  INTERNATIONAL_MASTER = 'International Master',
-  GRANDMASTER = 'Grandmaster',
-  INTERNATIONAL_GRANDMASTER = 'International Grandmaster',
-  LEGENDARY_GRANDMASTER = 'Legendary Grandmaster',
-}
-
-export interface ParsedUser extends User {
-  rank: CodeforcesRank;
-  maxRank: CodeforcesRank;
-  solveCount: number;
-  contestCount: number;
-  levels: Record<string, number>;
-  difficulties: Record<string, number>;
-  tags: Record<string, number>;
-}
+import {
+  CodeforcesRank,
+  ParsedUser,
+  Problem,
+  Problemset,
+  User,
+} from '../api/codeforces/interfaces';
+import {
+  createUser,
+  getRecentUser as getRecentUserFromDb,
+} from './user.services';
 
 const calculateRank = (rating: number): CodeforcesRank => {
   const rankMap: [number, CodeforcesRank][] = [
@@ -43,19 +29,10 @@ const calculateRank = (rating: number): CodeforcesRank => {
 };
 
 const parseUser = async (user: User): Promise<ParsedUser> => {
-  const levels: Record<string, number> = {};
-  const difficulties: Record<string, number> = {};
-  const tags: Record<string, number> = {};
-
-  for (const solution of Object.values(user.solutions)) {
-    const problem = solution.problem;
-    const level = problem.getLevel();
-    const difficulty = problem.difficulty ?? 'Unknown';
-
-    levels[level] = levels[level] + 1 || 1;
-    difficulties[difficulty] = difficulties[difficulty] + 1 || 1;
-    for (const tag of problem.tags) tags[tag] = tags[tag] + 1 || 1;
-  }
+  const problems: Problem[] = [];
+  for (const solution of Object.values(user.solutions))
+    problems.push(solution.problem);
+  const problemset = new Problemset(problems);
 
   const { rating, maxRating, solutions, contests } = user;
   const rank = calculateRank(rating);
@@ -73,9 +50,7 @@ const parseUser = async (user: User): Promise<ParsedUser> => {
     ),
     solveCount: Object.keys(user.solutions).length,
     contestCount: user.contests.length,
-    levels: Object.fromEntries(Object.entries(levels).sort()),
-    difficulties: Object.fromEntries(Object.entries(difficulties).sort()),
-    tags: Object.fromEntries(Object.entries(tags).sort((a, b) => b[1] - a[1])),
+    problemset,
   };
 
   return parsedUser;
@@ -83,7 +58,7 @@ const parseUser = async (user: User): Promise<ParsedUser> => {
 
 const getUser = async (handle: string): Promise<User> => {
   try {
-    const existingUser = await getUserFromDb(handle);
+    const existingUser = await getRecentUserFromDb(handle);
     if (existingUser) return existingUser;
 
     const user = await getUserFromApi(handle);

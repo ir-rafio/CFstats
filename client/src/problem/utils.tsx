@@ -1,40 +1,5 @@
-import { Problem } from '../api/interfaces';
-
 import { Box, Flex, Text } from '@chakra-ui/react';
-
-const getProblemLevel = (index: string): string => {
-  return index && index[0].match(/[A-Za-z]/) ? index[0].toUpperCase() : '0';
-};
-
-export const parseProblemset = (problems: Problem[]) => {
-  const levels: Record<string, number> = {};
-  const difficulties: Record<string, number> = {};
-  const tags: Record<string, number> = {};
-
-  for (const problem of problems) {
-    const level = getProblemLevel(problem.index);
-    const difficulty = problem.difficulty ?? 'Unknown';
-
-    levels[level] = levels[level] + 1 || 1;
-    difficulties[difficulty] = difficulties[difficulty] + 1 || 1;
-    for (const tag of problem.tags) tags[tag] = tags[tag] + 1 || 1;
-  }
-
-  const sortedLevels = Object.fromEntries(Object.entries(levels).sort());
-  const sortedDifficulties = Object.fromEntries(
-    Object.entries(difficulties).sort()
-  );
-  const sortedTags = Object.fromEntries(
-    Object.entries(tags).sort((a, b) => b[1] - a[1])
-  );
-
-  return {
-    problems,
-    levels: sortedLevels,
-    difficulties: sortedDifficulties,
-    tags: sortedTags,
-  };
-};
+import { Problemset } from '../api/interfaces';
 
 export const renderBarGraph = (
   data: Record<string, number>,
@@ -97,4 +62,9 @@ export const renderBarGraph = (
       </Box>
     </Flex>
   );
+};
+
+export const getStats = (problemset: Problemset) => {
+  const { levels, difficulties, tags } = problemset;
+  return { levels, difficulties, tags };
 };

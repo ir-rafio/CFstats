@@ -1,15 +1,11 @@
 import express, { Request, Response } from 'express';
-import {
-  getContest,
-  getContestList,
-  getFilteredContests,
-} from './contest.controller';
+import { getContest, getFilteredContests } from './contest.controller';
 
 const router = express.Router();
 
 router.get('/many', async (req: Request, res: Response) => {
   try {
-    const contestList = await getContestList();
+    const contestList = await getFilteredContests({});
     res.status(200).json(contestList);
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });

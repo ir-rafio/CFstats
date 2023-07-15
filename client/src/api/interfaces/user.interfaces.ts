@@ -1,5 +1,5 @@
 import { ContestInfo } from './contest.interfaces';
-import { Problem } from './problem.interfaces';
+import { Problem, Problemset } from './problem.interfaces';
 
 export interface UserSolution {
   problem: Problem;
@@ -21,7 +21,7 @@ export interface User {
   contests: ContestInfo[];
 }
 
-enum CodeforcesRank {
+export enum CodeforcesRank {
   NEWBIE = 'Newbie',
   PUPIL = 'Pupil',
   SPECIALIST = 'Specialist',
@@ -39,7 +39,5 @@ export interface ParsedUser extends User {
   maxRank: CodeforcesRank;
   solveCount: number;
   contestCount: number;
-  levels: Record<string, number>;
-  difficulties: Record<string, number>;
-  tags: Record<string, number>;
+  problemset: Problemset;
 }

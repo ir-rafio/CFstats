@@ -23,7 +23,7 @@ import {
   Problem,
   UserSolution,
 } from '../api/interfaces';
-import Problemset from '../problem/problemset.component';
+import ProblemsetComponent from '../problem/problemset.component';
 
 const UserComponent = () => {
   const { handle } = useParams();
@@ -60,10 +60,8 @@ const UserComponent = () => {
     contestCount,
     solutions,
     contests,
+    problemset,
   } = userData;
-
-  const problems: Problem[] = [];
-  solutions.map((solution) => problems.push(solution.problem));
 
   const rankColors = {
     Newbie: { color1: '#808080', color2: 'White' },
@@ -212,7 +210,7 @@ const UserComponent = () => {
 
       <Divider />
 
-      <Problemset problems={problems} />
+      <ProblemsetComponent problemset={problemset} />
     </VStack>
   );
 };

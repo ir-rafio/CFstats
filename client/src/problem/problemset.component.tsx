@@ -1,14 +1,15 @@
-import { Problem } from '../api/interfaces';
+import { Problemset } from '../api/interfaces';
 
 import { Box, Flex, Heading } from '@chakra-ui/react';
-import { parseProblemset, renderBarGraph } from './utils';
+import { getStats, renderBarGraph } from './utils';
 
 interface ProblemsetProps {
-  problems: Problem[];
+  problemset: Problemset;
 }
 
-const Problemset: React.FC<ProblemsetProps> = ({ problems }) => {
-  const { levels, difficulties, tags } = parseProblemset(problems);
+const ProblemsetComponent: React.FC<ProblemsetProps> = ({ problemset }) => {
+  // FIXME: Figure out why problemset.getStats() doesn't work.
+  const { levels, difficulties, tags } = getStats(problemset);
 
   return (
     <Flex>
@@ -28,4 +29,4 @@ const Problemset: React.FC<ProblemsetProps> = ({ problems }) => {
   );
 };
 
-export default Problemset;
+export default ProblemsetComponent;

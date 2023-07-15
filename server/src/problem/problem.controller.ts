@@ -2,18 +2,19 @@ import {
   getProblem as getProblemFromApi,
   getProblemList as getProblemListFromApi,
 } from '../api/codeforces';
-import { Problem } from '../api/codeforces/interfaces/problem.interfaces';
+import { Problem, Problemset } from '../api/codeforces/interfaces';
 import {
   createProblem,
-  getProblem as getProblemFromDb,
   getProblemMany,
+  getRecentProblem as getRecentProblemFromDb,
+  getRecentProblemMany,
 } from './problem.services';
 
 export const getProblem = async (key: string): Promise<Problem> => {
   try {
     const { contestId, index } = Problem.parseKey(key);
 
-    const existingProblem = await getProblemFromDb(contestId, index);
+    const existingProblem = await getRecentProblemFromDb(contestId, index);
     if (existingProblem) return existingProblem;
 
     const problem = await getProblemFromApi(contestId, index);
@@ -30,27 +31,20 @@ export const getProblem = async (key: string): Promise<Problem> => {
   }
 };
 
-export const getProblemList = async (): Promise<Problem[]> => {
-  try {
-    const existingProblemList = await getProblemMany({});
-    if (existingProblemList) return existingProblemList;
+export const getFilteredProblems = async (
+  prismaFilter: object
+): Promise<Problemset> => {
+  const existingProblems = await getRecentProblemMany(prismaFilter);
+  if (existingProblems) return new Problemset(existingProblems);
 
-    const problemList = await getProblemListFromApi();
-    let flag: boolean = true;
-
-    const createdProblemList: Problem[] = [];
-    for (const problem of problemList) {
-      const createdProblem = await createProblem(problem);
-      if (createdProblem) createdProblemList.push(createdProblem);
-      else {
-        console.error(`Failed to add Problem ${problem.getKey()} to Database`);
-        flag = false;
-      }
-    }
-
-    return flag ? createdProblemList : problemList;
-  } catch (error) {
-    console.error(error);
-    throw new Error('Failed to fetch problems from the API/Database.');
+  const problemList = await getProblemListFromApi();
+  const createdProblemList: Problem[] = [];
+  for (const problem of problemList) {
+    const createdProblem = await createProblem(problem);
+    if (createdProblem) createdProblemList.push(createdProblem);
+    else console.error(`Failed to add Problem ${problem.getKey()} to Database`);
   }
+
+  const filteredProblems = await getProblemMany(prismaFilter);
+  return new Problemset(filteredProblems ?? []);
 };
